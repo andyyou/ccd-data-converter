@@ -1,6 +1,6 @@
 ﻿namespace CCDConvert
 {
-    partial class Form1
+    partial class FormMain
     {
         /// <summary>
         /// 設計工具所需的變數。
@@ -28,166 +28,166 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.label1 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.textBox3 = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.textBox4 = new System.Windows.Forms.TextBox();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
+            this.lbSourceIP = new System.Windows.Forms.Label();
+            this.txtSourceIP = new System.Windows.Forms.TextBox();
+            this.lb1 = new System.Windows.Forms.Label();
+            this.txtSourcePort = new System.Windows.Forms.TextBox();
+            this.lbDestIP = new System.Windows.Forms.Label();
+            this.txtDestIP = new System.Windows.Forms.TextBox();
+            this.lb2 = new System.Windows.Forms.Label();
+            this.txtDestPort = new System.Windows.Forms.TextBox();
+            this.stInfo = new System.Windows.Forms.StatusStrip();
+            this.tslbStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tslbHardware = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tslbSoftware = new System.Windows.Forms.ToolStripStatusLabel();
             this.button1 = new System.Windows.Forms.Button();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.gpRelativeSettings = new System.Windows.Forms.GroupBox();
+            this.dgvRelativeSettings = new System.Windows.Forms.DataGridView();
             this.Source = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Target = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.label5 = new System.Windows.Forms.Label();
-            this.textBox5 = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.textBox6 = new System.Windows.Forms.TextBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.statusStrip1.SuspendLayout();
-            this.groupBox1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.lbYOffset = new System.Windows.Forms.Label();
+            this.txtY = new System.Windows.Forms.TextBox();
+            this.lbXOffset = new System.Windows.Forms.Label();
+            this.txtX = new System.Windows.Forms.TextBox();
+            this.lbUnit_1 = new System.Windows.Forms.Label();
+            this.lbUnit_2 = new System.Windows.Forms.Label();
+            this.stInfo.SuspendLayout();
+            this.gpRelativeSettings.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvRelativeSettings)).BeginInit();
             this.SuspendLayout();
             // 
-            // label1
+            // lbSourceIP
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(12, 9);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(70, 15);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Source IP";
+            this.lbSourceIP.AutoSize = true;
+            this.lbSourceIP.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbSourceIP.Location = new System.Drawing.Point(12, 9);
+            this.lbSourceIP.Name = "lbSourceIP";
+            this.lbSourceIP.Size = new System.Drawing.Size(70, 15);
+            this.lbSourceIP.TabIndex = 0;
+            this.lbSourceIP.Text = "Source IP";
             // 
-            // textBox1
+            // txtSourceIP
             // 
-            this.textBox1.Location = new System.Drawing.Point(88, 8);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(123, 22);
-            this.textBox1.TabIndex = 1;
+            this.txtSourceIP.Location = new System.Drawing.Point(88, 8);
+            this.txtSourceIP.Name = "txtSourceIP";
+            this.txtSourceIP.Size = new System.Drawing.Size(123, 22);
+            this.txtSourceIP.TabIndex = 1;
             // 
-            // label2
+            // lb1
             // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(217, 9);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(14, 15);
-            this.label2.TabIndex = 2;
-            this.label2.Text = ":";
+            this.lb1.AutoSize = true;
+            this.lb1.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lb1.Location = new System.Drawing.Point(217, 9);
+            this.lb1.Name = "lb1";
+            this.lb1.Size = new System.Drawing.Size(14, 15);
+            this.lb1.TabIndex = 2;
+            this.lb1.Text = ":";
             // 
-            // textBox2
+            // txtSourcePort
             // 
-            this.textBox2.Location = new System.Drawing.Point(237, 9);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(36, 22);
-            this.textBox2.TabIndex = 3;
+            this.txtSourcePort.Location = new System.Drawing.Point(237, 9);
+            this.txtSourcePort.Name = "txtSourcePort";
+            this.txtSourcePort.Size = new System.Drawing.Size(36, 22);
+            this.txtSourcePort.TabIndex = 3;
             // 
-            // label3
+            // lbDestIP
             // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(26, 39);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(56, 15);
-            this.label3.TabIndex = 4;
-            this.label3.Text = "Dest IP";
+            this.lbDestIP.AutoSize = true;
+            this.lbDestIP.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbDestIP.Location = new System.Drawing.Point(26, 39);
+            this.lbDestIP.Name = "lbDestIP";
+            this.lbDestIP.Size = new System.Drawing.Size(56, 15);
+            this.lbDestIP.TabIndex = 4;
+            this.lbDestIP.Text = "Dest IP";
             // 
-            // textBox3
+            // txtDestIP
             // 
-            this.textBox3.Location = new System.Drawing.Point(88, 36);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.Size = new System.Drawing.Size(123, 22);
-            this.textBox3.TabIndex = 5;
+            this.txtDestIP.Location = new System.Drawing.Point(88, 36);
+            this.txtDestIP.Name = "txtDestIP";
+            this.txtDestIP.Size = new System.Drawing.Size(123, 22);
+            this.txtDestIP.TabIndex = 5;
             // 
-            // label4
+            // lb2
             // 
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(217, 38);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(14, 15);
-            this.label4.TabIndex = 6;
-            this.label4.Text = ":";
+            this.lb2.AutoSize = true;
+            this.lb2.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lb2.Location = new System.Drawing.Point(217, 38);
+            this.lb2.Name = "lb2";
+            this.lb2.Size = new System.Drawing.Size(14, 15);
+            this.lb2.TabIndex = 6;
+            this.lb2.Text = ":";
             // 
-            // textBox4
+            // txtDestPort
             // 
-            this.textBox4.Location = new System.Drawing.Point(237, 35);
-            this.textBox4.Name = "textBox4";
-            this.textBox4.Size = new System.Drawing.Size(36, 22);
-            this.textBox4.TabIndex = 7;
+            this.txtDestPort.Location = new System.Drawing.Point(237, 35);
+            this.txtDestPort.Name = "txtDestPort";
+            this.txtDestPort.Size = new System.Drawing.Size(36, 22);
+            this.txtDestPort.TabIndex = 7;
             // 
-            // statusStrip1
+            // stInfo
             // 
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripStatusLabel1,
-            this.toolStripStatusLabel2,
-            this.toolStripStatusLabel3});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 543);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(486, 22);
-            this.statusStrip1.TabIndex = 8;
-            this.statusStrip1.Text = "statusStrip1";
+            this.stInfo.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tslbStatus,
+            this.tslbHardware,
+            this.tslbSoftware});
+            this.stInfo.Location = new System.Drawing.Point(0, 543);
+            this.stInfo.Name = "stInfo";
+            this.stInfo.Size = new System.Drawing.Size(486, 22);
+            this.stInfo.TabIndex = 8;
+            this.stInfo.Text = "statusStrip1";
             // 
-            // toolStripStatusLabel1
+            // tslbStatus
             // 
-            this.toolStripStatusLabel1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripStatusLabel1.Image")));
-            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(129, 17);
-            this.toolStripStatusLabel1.Text = "Status : Connected";
+            this.tslbStatus.Image = ((System.Drawing.Image)(resources.GetObject("tslbStatus.Image")));
+            this.tslbStatus.Name = "tslbStatus";
+            this.tslbStatus.Size = new System.Drawing.Size(129, 17);
+            this.tslbStatus.Text = "Status : Connected";
             // 
-            // toolStripStatusLabel2
+            // tslbHardware
             // 
-            this.toolStripStatusLabel2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripStatusLabel2.Image")));
-            this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
-            this.toolStripStatusLabel2.Size = new System.Drawing.Size(99, 17);
-            this.toolStripStatusLabel2.Text = "Hardware OK";
+            this.tslbHardware.Image = ((System.Drawing.Image)(resources.GetObject("tslbHardware.Image")));
+            this.tslbHardware.Name = "tslbHardware";
+            this.tslbHardware.Size = new System.Drawing.Size(99, 17);
+            this.tslbHardware.Text = "Hardware OK";
             // 
-            // toolStripStatusLabel3
+            // tslbSoftware
             // 
-            this.toolStripStatusLabel3.Image = ((System.Drawing.Image)(resources.GetObject("toolStripStatusLabel3.Image")));
-            this.toolStripStatusLabel3.Name = "toolStripStatusLabel3";
-            this.toolStripStatusLabel3.Size = new System.Drawing.Size(77, 17);
-            this.toolStripStatusLabel3.Text = "Sofeware";
+            this.tslbSoftware.Image = ((System.Drawing.Image)(resources.GetObject("tslbSoftware.Image")));
+            this.tslbSoftware.Name = "tslbSoftware";
+            this.tslbSoftware.Size = new System.Drawing.Size(74, 17);
+            this.tslbSoftware.Text = "Software";
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(280, 9);
+            this.button1.Location = new System.Drawing.Point(280, 8);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(188, 65);
             this.button1.TabIndex = 9;
             this.button1.Text = "Start";
             this.button1.UseVisualStyleBackColor = true;
             // 
-            // groupBox1
+            // gpRelativeSettings
             // 
-            this.groupBox1.Controls.Add(this.dataGridView1);
-            this.groupBox1.Location = new System.Drawing.Point(15, 121);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(453, 419);
-            this.groupBox1.TabIndex = 11;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Relative Settings";
+            this.gpRelativeSettings.Controls.Add(this.dgvRelativeSettings);
+            this.gpRelativeSettings.Location = new System.Drawing.Point(15, 121);
+            this.gpRelativeSettings.Name = "gpRelativeSettings";
+            this.gpRelativeSettings.Size = new System.Drawing.Size(453, 419);
+            this.gpRelativeSettings.TabIndex = 11;
+            this.gpRelativeSettings.TabStop = false;
+            this.gpRelativeSettings.Text = "Relative Settings";
             // 
-            // dataGridView1
+            // dgvRelativeSettings
             // 
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.dgvRelativeSettings.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvRelativeSettings.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Source,
             this.Target});
-            this.dataGridView1.Location = new System.Drawing.Point(17, 21);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.RowTemplate.Height = 24;
-            this.dataGridView1.Size = new System.Drawing.Size(420, 383);
-            this.dataGridView1.TabIndex = 0;
+            this.dgvRelativeSettings.Location = new System.Drawing.Point(17, 21);
+            this.dgvRelativeSettings.Name = "dgvRelativeSettings";
+            this.dgvRelativeSettings.RowTemplate.Height = 24;
+            this.dgvRelativeSettings.Size = new System.Drawing.Size(420, 383);
+            this.dgvRelativeSettings.TabIndex = 0;
             // 
             // Source
             // 
@@ -201,86 +201,86 @@
             this.Target.Name = "Target";
             this.Target.Width = 180;
             // 
-            // label5
+            // lbYOffset
             // 
-            this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label5.Location = new System.Drawing.Point(20, 86);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(63, 15);
-            this.label5.TabIndex = 12;
-            this.label5.Text = "Y Offset";
+            this.lbYOffset.AutoSize = true;
+            this.lbYOffset.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbYOffset.Location = new System.Drawing.Point(12, 68);
+            this.lbYOffset.Name = "lbYOffset";
+            this.lbYOffset.Size = new System.Drawing.Size(63, 15);
+            this.lbYOffset.TabIndex = 12;
+            this.lbYOffset.Text = "Y Offset";
             // 
-            // textBox5
+            // txtY
             // 
-            this.textBox5.Location = new System.Drawing.Point(89, 82);
-            this.textBox5.Name = "textBox5";
-            this.textBox5.Size = new System.Drawing.Size(100, 22);
-            this.textBox5.TabIndex = 13;
+            this.txtY.Location = new System.Drawing.Point(88, 68);
+            this.txtY.Name = "txtY";
+            this.txtY.Size = new System.Drawing.Size(67, 22);
+            this.txtY.TabIndex = 13;
             // 
-            // label6
+            // lbXOffset
             // 
-            this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(258, 86);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(63, 15);
-            this.label6.TabIndex = 14;
-            this.label6.Text = "X Offset";
+            this.lbXOffset.AutoSize = true;
+            this.lbXOffset.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbXOffset.Location = new System.Drawing.Point(12, 92);
+            this.lbXOffset.Name = "lbXOffset";
+            this.lbXOffset.Size = new System.Drawing.Size(63, 15);
+            this.lbXOffset.TabIndex = 14;
+            this.lbXOffset.Text = "X Offset";
             // 
-            // textBox6
+            // txtX
             // 
-            this.textBox6.Location = new System.Drawing.Point(323, 82);
-            this.textBox6.Name = "textBox6";
-            this.textBox6.Size = new System.Drawing.Size(100, 22);
-            this.textBox6.TabIndex = 15;
+            this.txtX.Location = new System.Drawing.Point(88, 93);
+            this.txtX.Name = "txtX";
+            this.txtX.Size = new System.Drawing.Size(67, 22);
+            this.txtX.TabIndex = 15;
             // 
-            // label7
+            // lbUnit_1
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(192, 92);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(23, 12);
-            this.label7.TabIndex = 16;
-            this.label7.Text = "mm";
+            this.lbUnit_1.AutoSize = true;
+            this.lbUnit_1.Location = new System.Drawing.Point(161, 78);
+            this.lbUnit_1.Name = "lbUnit_1";
+            this.lbUnit_1.Size = new System.Drawing.Size(23, 12);
+            this.lbUnit_1.TabIndex = 16;
+            this.lbUnit_1.Text = "mm";
             // 
-            // label8
+            // lbUnit_2
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(425, 92);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(23, 12);
-            this.label8.TabIndex = 17;
-            this.label8.Text = "mm";
+            this.lbUnit_2.AutoSize = true;
+            this.lbUnit_2.Location = new System.Drawing.Point(161, 103);
+            this.lbUnit_2.Name = "lbUnit_2";
+            this.lbUnit_2.Size = new System.Drawing.Size(23, 12);
+            this.lbUnit_2.TabIndex = 17;
+            this.lbUnit_2.Text = "mm";
             // 
-            // Form1
+            // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(486, 565);
-            this.Controls.Add(this.label8);
-            this.Controls.Add(this.label7);
-            this.Controls.Add(this.textBox6);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.textBox5);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.lbUnit_2);
+            this.Controls.Add(this.lbUnit_1);
+            this.Controls.Add(this.txtX);
+            this.Controls.Add(this.lbXOffset);
+            this.Controls.Add(this.txtY);
+            this.Controls.Add(this.lbYOffset);
+            this.Controls.Add(this.gpRelativeSettings);
             this.Controls.Add(this.button1);
-            this.Controls.Add(this.statusStrip1);
-            this.Controls.Add(this.textBox4);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.textBox3);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.textBox2);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.textBox1);
-            this.Controls.Add(this.label1);
-            this.Name = "Form1";
+            this.Controls.Add(this.stInfo);
+            this.Controls.Add(this.txtDestPort);
+            this.Controls.Add(this.lb2);
+            this.Controls.Add(this.txtDestIP);
+            this.Controls.Add(this.lbDestIP);
+            this.Controls.Add(this.txtSourcePort);
+            this.Controls.Add(this.lb1);
+            this.Controls.Add(this.txtSourceIP);
+            this.Controls.Add(this.lbSourceIP);
+            this.Name = "FormMain";
             this.Text = "CCD Data Convert";
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            this.stInfo.ResumeLayout(false);
+            this.stInfo.PerformLayout();
+            this.gpRelativeSettings.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvRelativeSettings)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -288,29 +288,29 @@
 
         #endregion
 
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox textBox2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox textBox4;
-        private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
+        private System.Windows.Forms.Label lbSourceIP;
+        private System.Windows.Forms.TextBox txtSourceIP;
+        private System.Windows.Forms.Label lb1;
+        private System.Windows.Forms.TextBox txtSourcePort;
+        private System.Windows.Forms.Label lbDestIP;
+        private System.Windows.Forms.TextBox txtDestIP;
+        private System.Windows.Forms.Label lb2;
+        private System.Windows.Forms.TextBox txtDestPort;
+        private System.Windows.Forms.StatusStrip stInfo;
+        private System.Windows.Forms.ToolStripStatusLabel tslbStatus;
+        private System.Windows.Forms.ToolStripStatusLabel tslbHardware;
+        private System.Windows.Forms.ToolStripStatusLabel tslbSoftware;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.GroupBox gpRelativeSettings;
+        private System.Windows.Forms.DataGridView dgvRelativeSettings;
         private System.Windows.Forms.DataGridViewTextBoxColumn Source;
         private System.Windows.Forms.DataGridViewTextBoxColumn Target;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox textBox5;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.TextBox textBox6;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label lbYOffset;
+        private System.Windows.Forms.TextBox txtY;
+        private System.Windows.Forms.Label lbXOffset;
+        private System.Windows.Forms.TextBox txtX;
+        private System.Windows.Forms.Label lbUnit_1;
+        private System.Windows.Forms.Label lbUnit_2;
     }
 }
 
