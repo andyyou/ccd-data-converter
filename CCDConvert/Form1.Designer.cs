@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.lbSourceIP = new System.Windows.Forms.Label();
             this.txtSourceIP = new System.Windows.Forms.TextBox();
             this.lb1 = new System.Windows.Forms.Label();
@@ -139,23 +138,20 @@
             // 
             // tslbStatus
             // 
-            this.tslbStatus.Image = ((System.Drawing.Image)(resources.GetObject("tslbStatus.Image")));
             this.tslbStatus.Name = "tslbStatus";
-            this.tslbStatus.Size = new System.Drawing.Size(129, 17);
+            this.tslbStatus.Size = new System.Drawing.Size(113, 17);
             this.tslbStatus.Text = "Status : Connected";
             // 
             // tslbHardware
             // 
-            this.tslbHardware.Image = ((System.Drawing.Image)(resources.GetObject("tslbHardware.Image")));
             this.tslbHardware.Name = "tslbHardware";
-            this.tslbHardware.Size = new System.Drawing.Size(99, 17);
+            this.tslbHardware.Size = new System.Drawing.Size(83, 17);
             this.tslbHardware.Text = "Hardware OK";
             // 
             // tslbSoftware
             // 
-            this.tslbSoftware.Image = ((System.Drawing.Image)(resources.GetObject("tslbSoftware.Image")));
             this.tslbSoftware.Name = "tslbSoftware";
-            this.tslbSoftware.Size = new System.Drawing.Size(74, 17);
+            this.tslbSoftware.Size = new System.Drawing.Size(58, 17);
             this.tslbSoftware.Text = "Software";
             // 
             // btnStart
