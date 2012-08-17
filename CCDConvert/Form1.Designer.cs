@@ -41,7 +41,7 @@
             this.tslbStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.tslbHardware = new System.Windows.Forms.ToolStripStatusLabel();
             this.tslbSoftware = new System.Windows.Forms.ToolStripStatusLabel();
-            this.button1 = new System.Windows.Forms.Button();
+            this.btnStart = new System.Windows.Forms.Button();
             this.gpRelativeSettings = new System.Windows.Forms.GroupBox();
             this.dgvRelativeSettings = new System.Windows.Forms.DataGridView();
             this.Source = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -61,7 +61,7 @@
             // 
             this.lbSourceIP.AutoSize = true;
             this.lbSourceIP.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbSourceIP.Location = new System.Drawing.Point(12, 9);
+            this.lbSourceIP.Location = new System.Drawing.Point(14, 16);
             this.lbSourceIP.Name = "lbSourceIP";
             this.lbSourceIP.Size = new System.Drawing.Size(70, 15);
             this.lbSourceIP.TabIndex = 0;
@@ -69,7 +69,7 @@
             // 
             // txtSourceIP
             // 
-            this.txtSourceIP.Location = new System.Drawing.Point(88, 8);
+            this.txtSourceIP.Location = new System.Drawing.Point(90, 12);
             this.txtSourceIP.Name = "txtSourceIP";
             this.txtSourceIP.Size = new System.Drawing.Size(123, 22);
             this.txtSourceIP.TabIndex = 1;
@@ -78,7 +78,7 @@
             // 
             this.lb1.AutoSize = true;
             this.lb1.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lb1.Location = new System.Drawing.Point(217, 9);
+            this.lb1.Location = new System.Drawing.Point(219, 16);
             this.lb1.Name = "lb1";
             this.lb1.Size = new System.Drawing.Size(14, 15);
             this.lb1.TabIndex = 2;
@@ -86,7 +86,7 @@
             // 
             // txtSourcePort
             // 
-            this.txtSourcePort.Location = new System.Drawing.Point(237, 9);
+            this.txtSourcePort.Location = new System.Drawing.Point(239, 12);
             this.txtSourcePort.Name = "txtSourcePort";
             this.txtSourcePort.Size = new System.Drawing.Size(36, 22);
             this.txtSourcePort.TabIndex = 3;
@@ -95,7 +95,7 @@
             // 
             this.lbDestIP.AutoSize = true;
             this.lbDestIP.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbDestIP.Location = new System.Drawing.Point(26, 39);
+            this.lbDestIP.Location = new System.Drawing.Point(28, 44);
             this.lbDestIP.Name = "lbDestIP";
             this.lbDestIP.Size = new System.Drawing.Size(56, 15);
             this.lbDestIP.TabIndex = 4;
@@ -103,7 +103,7 @@
             // 
             // txtDestIP
             // 
-            this.txtDestIP.Location = new System.Drawing.Point(88, 36);
+            this.txtDestIP.Location = new System.Drawing.Point(90, 40);
             this.txtDestIP.Name = "txtDestIP";
             this.txtDestIP.Size = new System.Drawing.Size(123, 22);
             this.txtDestIP.TabIndex = 5;
@@ -112,7 +112,7 @@
             // 
             this.lb2.AutoSize = true;
             this.lb2.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lb2.Location = new System.Drawing.Point(217, 38);
+            this.lb2.Location = new System.Drawing.Point(219, 44);
             this.lb2.Name = "lb2";
             this.lb2.Size = new System.Drawing.Size(14, 15);
             this.lb2.TabIndex = 6;
@@ -120,7 +120,7 @@
             // 
             // txtDestPort
             // 
-            this.txtDestPort.Location = new System.Drawing.Point(237, 35);
+            this.txtDestPort.Location = new System.Drawing.Point(239, 40);
             this.txtDestPort.Name = "txtDestPort";
             this.txtDestPort.Size = new System.Drawing.Size(36, 22);
             this.txtDestPort.TabIndex = 7;
@@ -158,19 +158,20 @@
             this.tslbSoftware.Size = new System.Drawing.Size(74, 17);
             this.tslbSoftware.Text = "Software";
             // 
-            // button1
+            // btnStart
             // 
-            this.button1.Location = new System.Drawing.Point(280, 8);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(188, 65);
-            this.button1.TabIndex = 9;
-            this.button1.Text = "Start";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btnStart.Location = new System.Drawing.Point(282, 12);
+            this.btnStart.Name = "btnStart";
+            this.btnStart.Size = new System.Drawing.Size(188, 50);
+            this.btnStart.TabIndex = 9;
+            this.btnStart.Text = "Start";
+            this.btnStart.UseVisualStyleBackColor = true;
+            this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
             // 
             // gpRelativeSettings
             // 
             this.gpRelativeSettings.Controls.Add(this.dgvRelativeSettings);
-            this.gpRelativeSettings.Location = new System.Drawing.Point(15, 121);
+            this.gpRelativeSettings.Location = new System.Drawing.Point(17, 121);
             this.gpRelativeSettings.Name = "gpRelativeSettings";
             this.gpRelativeSettings.Size = new System.Drawing.Size(453, 419);
             this.gpRelativeSettings.TabIndex = 11;
@@ -205,7 +206,7 @@
             // 
             this.lbYOffset.AutoSize = true;
             this.lbYOffset.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbYOffset.Location = new System.Drawing.Point(12, 68);
+            this.lbYOffset.Location = new System.Drawing.Point(14, 76);
             this.lbYOffset.Name = "lbYOffset";
             this.lbYOffset.Size = new System.Drawing.Size(63, 15);
             this.lbYOffset.TabIndex = 12;
@@ -213,7 +214,7 @@
             // 
             // txtY
             // 
-            this.txtY.Location = new System.Drawing.Point(88, 68);
+            this.txtY.Location = new System.Drawing.Point(90, 72);
             this.txtY.Name = "txtY";
             this.txtY.Size = new System.Drawing.Size(67, 22);
             this.txtY.TabIndex = 13;
@@ -222,7 +223,7 @@
             // 
             this.lbXOffset.AutoSize = true;
             this.lbXOffset.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbXOffset.Location = new System.Drawing.Point(12, 92);
+            this.lbXOffset.Location = new System.Drawing.Point(14, 101);
             this.lbXOffset.Name = "lbXOffset";
             this.lbXOffset.Size = new System.Drawing.Size(63, 15);
             this.lbXOffset.TabIndex = 14;
@@ -230,7 +231,7 @@
             // 
             // txtX
             // 
-            this.txtX.Location = new System.Drawing.Point(88, 93);
+            this.txtX.Location = new System.Drawing.Point(90, 97);
             this.txtX.Name = "txtX";
             this.txtX.Size = new System.Drawing.Size(67, 22);
             this.txtX.TabIndex = 15;
@@ -238,7 +239,7 @@
             // lbUnit_1
             // 
             this.lbUnit_1.AutoSize = true;
-            this.lbUnit_1.Location = new System.Drawing.Point(161, 78);
+            this.lbUnit_1.Location = new System.Drawing.Point(163, 77);
             this.lbUnit_1.Name = "lbUnit_1";
             this.lbUnit_1.Size = new System.Drawing.Size(23, 12);
             this.lbUnit_1.TabIndex = 16;
@@ -247,7 +248,7 @@
             // lbUnit_2
             // 
             this.lbUnit_2.AutoSize = true;
-            this.lbUnit_2.Location = new System.Drawing.Point(161, 103);
+            this.lbUnit_2.Location = new System.Drawing.Point(163, 102);
             this.lbUnit_2.Name = "lbUnit_2";
             this.lbUnit_2.Size = new System.Drawing.Size(23, 12);
             this.lbUnit_2.TabIndex = 17;
@@ -265,7 +266,7 @@
             this.Controls.Add(this.txtY);
             this.Controls.Add(this.lbYOffset);
             this.Controls.Add(this.gpRelativeSettings);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btnStart);
             this.Controls.Add(this.stInfo);
             this.Controls.Add(this.txtDestPort);
             this.Controls.Add(this.lb2);
@@ -277,6 +278,7 @@
             this.Controls.Add(this.lbSourceIP);
             this.Name = "FormMain";
             this.Text = "CCD Data Convert";
+            this.Load += new System.EventHandler(this.FormMain_Load);
             this.stInfo.ResumeLayout(false);
             this.stInfo.PerformLayout();
             this.gpRelativeSettings.ResumeLayout(false);
@@ -300,7 +302,7 @@
         private System.Windows.Forms.ToolStripStatusLabel tslbStatus;
         private System.Windows.Forms.ToolStripStatusLabel tslbHardware;
         private System.Windows.Forms.ToolStripStatusLabel tslbSoftware;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnStart;
         private System.Windows.Forms.GroupBox gpRelativeSettings;
         private System.Windows.Forms.DataGridView dgvRelativeSettings;
         private System.Windows.Forms.DataGridViewTextBoxColumn Source;
