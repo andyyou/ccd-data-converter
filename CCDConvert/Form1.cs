@@ -28,8 +28,8 @@ namespace CCDConvert
         private static ILog log = LogManager.GetLogger(typeof(Program));
         private static string xmlPath = @"C:\Projects\Github\CCDConvert\CCDConvert\config\config.xml";
 
-        private double _offset_default_y;
-        private static Dictionary<string, string> dicRelative = new Dictionary<string, string>();
+        private double _offset_default_y, offset_y, offset_x;
+        private Dictionary<string, string> dicRelative = new Dictionary<string, string>();
         #endregion
 
         public FormMain()
@@ -37,12 +37,8 @@ namespace CCDConvert
             InitializeComponent();
         }
 
-       
-
         private void FormMain_Load(object sender, EventArgs e)
         {
-           
-
             // Initial status image
             tslbStatus.Image = Properties.Resources.Stop;
             tslbHardware.Image = Properties.Resources.Stop;
@@ -165,11 +161,9 @@ namespace CCDConvert
         /// <returns></returns>
         private string convertData(string input , double default_offset_y)
         {
-           
-
             string pattern = @"^DATA*";
             Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
-            Dictionary<string, string> dicResult = new Dictionary<string, string>();
+            Dictionary<string, string> dicOutpout = new Dictionary<string, string>();
            
             if (regex.IsMatch(input))
             {
@@ -178,18 +172,18 @@ namespace CCDConvert
                 foreach(string i in tmp)
                 {
                     string[] sp = i.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    dicResult.Add(sp[0].ToString(), sp[1].ToString());
+                    dicOutpout.Add(sp[0].ToString(), sp[1].ToString());
                 }
             }
 
             // Deal format string
-            double offset_y = double.TryParse(txtY.Text, out offset_y) ? offset_y : 0;
-            double offset_x = double.TryParse(txtX.Text, out offset_x) ? offset_x : 0;
-            double y = double.Parse(dicResult["FlawMD"]) * 1000 + _offset_default_y + offset_y;
-            double x = double.Parse(dicResult["FlawCD"]) * 1000 + offset_x;
+            //double offset_y = double.TryParse(txtY.Text, out offset_y) ? offset_y : 0;
+            //double offset_x = double.TryParse(txtX.Text, out offset_x) ? offset_x : 0;
+            double y = double.Parse(dicOutpout["FlawMD"]) * 1000 + _offset_default_y + offset_y;
+            double x = double.Parse(dicOutpout["FlawCD"]) * 1000 + offset_x;
              string result = "";
-             if (dicRelative.ContainsKey(dicResult["FlawName"]))
-                 result = String.Format("{0};{1};{2}", dicRelative[dicResult["FlawName"]], y.ToString(), x.ToString());
+             if (dicRelative.ContainsKey(dicOutpout["FlawName"]))
+                 result = String.Format("{0};{1};{2}", dicRelative[dicOutpout["FlawName"]], y.ToString(), x.ToString());
              else
                  result = String.Format("{0};{1};{2}", "0", y.ToString(), x.ToString());
 
@@ -200,6 +194,8 @@ namespace CCDConvert
         {
             // Set relative data and data of convert method.
             dicRelative = getRelativeGridViewToDictionary(dgvRelativeSettings);
+            offset_y = double.TryParse(txtY.Text, out offset_y) ? offset_y : 0;
+            offset_x = double.TryParse(txtX.Text, out offset_x) ? offset_x : 0;
         }
 
         private bool getXml(string path, DataGridView dgv)
@@ -211,7 +207,6 @@ namespace CCDConvert
             txtY.Text = navigator.SelectSingleNode("//offset[@name='Y']").Value;
             txtX.Text = navigator.SelectSingleNode("//offset[@name='X']").Value;
             _offset_default_y = navigator.SelectSingleNode("//offset[@name='DefaultOffsetY']").ValueAsDouble;
-           
 
             XPathNodeIterator node = navigator.Select("//relative_table/column");
             while (node.MoveNext())
