@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.lbSourceIP = new System.Windows.Forms.Label();
             this.txtSourceIP = new System.Windows.Forms.TextBox();
             this.lb1 = new System.Windows.Forms.Label();
@@ -52,9 +51,13 @@
             this.txtX = new System.Windows.Forms.TextBox();
             this.lbUnit_1 = new System.Windows.Forms.Label();
             this.lbUnit_2 = new System.Windows.Forms.Label();
+            this.btnStop = new System.Windows.Forms.Button();
+            this.txtLog = new System.Windows.Forms.TextBox();
+            this.gpLog = new System.Windows.Forms.GroupBox();
             this.stInfo.SuspendLayout();
             this.gpRelativeSettings.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvRelativeSettings)).BeginInit();
+            this.gpLog.SuspendLayout();
             this.SuspendLayout();
             // 
             // lbSourceIP
@@ -73,6 +76,7 @@
             this.txtSourceIP.Name = "txtSourceIP";
             this.txtSourceIP.Size = new System.Drawing.Size(123, 22);
             this.txtSourceIP.TabIndex = 1;
+            this.txtSourceIP.Validating += new System.ComponentModel.CancelEventHandler(this.IP_Validating);
             // 
             // lb1
             // 
@@ -90,6 +94,7 @@
             this.txtSourcePort.Name = "txtSourcePort";
             this.txtSourcePort.Size = new System.Drawing.Size(36, 22);
             this.txtSourcePort.TabIndex = 3;
+            this.txtSourcePort.Validating += new System.ComponentModel.CancelEventHandler(this.Port_Validating);
             // 
             // lbDestIP
             // 
@@ -107,6 +112,7 @@
             this.txtDestIP.Name = "txtDestIP";
             this.txtDestIP.Size = new System.Drawing.Size(123, 22);
             this.txtDestIP.TabIndex = 5;
+            this.txtDestIP.Validating += new System.ComponentModel.CancelEventHandler(this.IP_Validating);
             // 
             // lb2
             // 
@@ -124,6 +130,7 @@
             this.txtDestPort.Name = "txtDestPort";
             this.txtDestPort.Size = new System.Drawing.Size(36, 22);
             this.txtDestPort.TabIndex = 7;
+            this.txtDestPort.Validating += new System.ComponentModel.CancelEventHandler(this.Port_Validating);
             // 
             // stInfo
             // 
@@ -133,47 +140,46 @@
             this.tslbSoftware});
             this.stInfo.Location = new System.Drawing.Point(0, 543);
             this.stInfo.Name = "stInfo";
-            this.stInfo.Size = new System.Drawing.Size(486, 22);
+            this.stInfo.Size = new System.Drawing.Size(867, 22);
             this.stInfo.TabIndex = 8;
             this.stInfo.Text = "statusStrip1";
             // 
             // tslbStatus
             // 
-            this.tslbStatus.Image = ((System.Drawing.Image)(resources.GetObject("tslbStatus.Image")));
             this.tslbStatus.Name = "tslbStatus";
-            this.tslbStatus.Size = new System.Drawing.Size(129, 17);
+            this.tslbStatus.Size = new System.Drawing.Size(113, 17);
             this.tslbStatus.Text = "Status : Connected";
             // 
             // tslbHardware
             // 
-            this.tslbHardware.Image = ((System.Drawing.Image)(resources.GetObject("tslbHardware.Image")));
             this.tslbHardware.Name = "tslbHardware";
-            this.tslbHardware.Size = new System.Drawing.Size(99, 17);
+            this.tslbHardware.Size = new System.Drawing.Size(83, 17);
             this.tslbHardware.Text = "Hardware OK";
             // 
             // tslbSoftware
             // 
-            this.tslbSoftware.Image = ((System.Drawing.Image)(resources.GetObject("tslbSoftware.Image")));
             this.tslbSoftware.Name = "tslbSoftware";
-            this.tslbSoftware.Size = new System.Drawing.Size(74, 17);
+            this.tslbSoftware.Size = new System.Drawing.Size(58, 17);
             this.tslbSoftware.Text = "Software";
             // 
             // btnStart
             // 
-            this.btnStart.Location = new System.Drawing.Point(282, 12);
+            this.btnStart.Font = new System.Drawing.Font("Georgia", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnStart.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.btnStart.Location = new System.Drawing.Point(664, 6);
             this.btnStart.Name = "btnStart";
-            this.btnStart.Size = new System.Drawing.Size(188, 50);
+            this.btnStart.Size = new System.Drawing.Size(191, 80);
             this.btnStart.TabIndex = 9;
-            this.btnStart.Text = "Start";
+            this.btnStart.Text = "Start(&L)";
             this.btnStart.UseVisualStyleBackColor = true;
             this.btnStart.Click += new System.EventHandler(this.btnStart_Click);
             // 
             // gpRelativeSettings
             // 
             this.gpRelativeSettings.Controls.Add(this.dgvRelativeSettings);
-            this.gpRelativeSettings.Location = new System.Drawing.Point(17, 121);
+            this.gpRelativeSettings.Location = new System.Drawing.Point(17, 92);
             this.gpRelativeSettings.Name = "gpRelativeSettings";
-            this.gpRelativeSettings.Size = new System.Drawing.Size(453, 419);
+            this.gpRelativeSettings.Size = new System.Drawing.Size(387, 419);
             this.gpRelativeSettings.TabIndex = 11;
             this.gpRelativeSettings.TabStop = false;
             this.gpRelativeSettings.Text = "Relative Settings";
@@ -187,26 +193,26 @@
             this.dgvRelativeSettings.Location = new System.Drawing.Point(17, 21);
             this.dgvRelativeSettings.Name = "dgvRelativeSettings";
             this.dgvRelativeSettings.RowTemplate.Height = 24;
-            this.dgvRelativeSettings.Size = new System.Drawing.Size(420, 383);
+            this.dgvRelativeSettings.Size = new System.Drawing.Size(345, 383);
             this.dgvRelativeSettings.TabIndex = 0;
             // 
             // Source
             // 
             this.Source.HeaderText = "Source";
             this.Source.Name = "Source";
-            this.Source.Width = 200;
+            this.Source.Width = 150;
             // 
             // Target
             // 
             this.Target.HeaderText = "Target";
             this.Target.Name = "Target";
-            this.Target.Width = 180;
+            this.Target.Width = 150;
             // 
             // lbYOffset
             // 
             this.lbYOffset.AutoSize = true;
             this.lbYOffset.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbYOffset.Location = new System.Drawing.Point(14, 76);
+            this.lbYOffset.Location = new System.Drawing.Point(294, 16);
             this.lbYOffset.Name = "lbYOffset";
             this.lbYOffset.Size = new System.Drawing.Size(63, 15);
             this.lbYOffset.TabIndex = 12;
@@ -214,16 +220,17 @@
             // 
             // txtY
             // 
-            this.txtY.Location = new System.Drawing.Point(90, 72);
+            this.txtY.Location = new System.Drawing.Point(363, 15);
             this.txtY.Name = "txtY";
             this.txtY.Size = new System.Drawing.Size(67, 22);
             this.txtY.TabIndex = 13;
+            this.txtY.Validating += new System.ComponentModel.CancelEventHandler(this.offset_Validating);
             // 
             // lbXOffset
             // 
             this.lbXOffset.AutoSize = true;
             this.lbXOffset.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbXOffset.Location = new System.Drawing.Point(14, 101);
+            this.lbXOffset.Location = new System.Drawing.Point(294, 44);
             this.lbXOffset.Name = "lbXOffset";
             this.lbXOffset.Size = new System.Drawing.Size(63, 15);
             this.lbXOffset.TabIndex = 14;
@@ -231,15 +238,16 @@
             // 
             // txtX
             // 
-            this.txtX.Location = new System.Drawing.Point(90, 97);
+            this.txtX.Location = new System.Drawing.Point(363, 43);
             this.txtX.Name = "txtX";
             this.txtX.Size = new System.Drawing.Size(67, 22);
             this.txtX.TabIndex = 15;
+            this.txtX.Validating += new System.ComponentModel.CancelEventHandler(this.offset_Validating);
             // 
             // lbUnit_1
             // 
             this.lbUnit_1.AutoSize = true;
-            this.lbUnit_1.Location = new System.Drawing.Point(163, 77);
+            this.lbUnit_1.Location = new System.Drawing.Point(431, 22);
             this.lbUnit_1.Name = "lbUnit_1";
             this.lbUnit_1.Size = new System.Drawing.Size(23, 12);
             this.lbUnit_1.TabIndex = 16;
@@ -248,17 +256,48 @@
             // lbUnit_2
             // 
             this.lbUnit_2.AutoSize = true;
-            this.lbUnit_2.Location = new System.Drawing.Point(163, 102);
+            this.lbUnit_2.Location = new System.Drawing.Point(431, 50);
             this.lbUnit_2.Name = "lbUnit_2";
             this.lbUnit_2.Size = new System.Drawing.Size(23, 12);
             this.lbUnit_2.TabIndex = 17;
             this.lbUnit_2.Text = "mm";
             // 
+            // btnStop
+            // 
+            this.btnStop.Font = new System.Drawing.Font("Georgia", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnStop.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.btnStop.Location = new System.Drawing.Point(553, 6);
+            this.btnStop.Name = "btnStop";
+            this.btnStop.Size = new System.Drawing.Size(86, 80);
+            this.btnStop.TabIndex = 18;
+            this.btnStop.Text = "Send(&S)";
+            this.btnStop.UseVisualStyleBackColor = true;
+            // 
+            // txtLog
+            // 
+            this.txtLog.Location = new System.Drawing.Point(17, 21);
+            this.txtLog.Multiline = true;
+            this.txtLog.Name = "txtLog";
+            this.txtLog.Size = new System.Drawing.Size(386, 383);
+            this.txtLog.TabIndex = 19;
+            // 
+            // gpLog
+            // 
+            this.gpLog.Controls.Add(this.txtLog);
+            this.gpLog.Location = new System.Drawing.Point(433, 92);
+            this.gpLog.Name = "gpLog";
+            this.gpLog.Size = new System.Drawing.Size(422, 419);
+            this.gpLog.TabIndex = 21;
+            this.gpLog.TabStop = false;
+            this.gpLog.Text = "Message";
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(486, 565);
+            this.ClientSize = new System.Drawing.Size(867, 565);
+            this.Controls.Add(this.gpLog);
+            this.Controls.Add(this.btnStop);
             this.Controls.Add(this.lbUnit_2);
             this.Controls.Add(this.lbUnit_1);
             this.Controls.Add(this.txtX);
@@ -278,11 +317,14 @@
             this.Controls.Add(this.lbSourceIP);
             this.Name = "FormMain";
             this.Text = "CCD Data Convert";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMain_FormClosing);
             this.Load += new System.EventHandler(this.FormMain_Load);
             this.stInfo.ResumeLayout(false);
             this.stInfo.PerformLayout();
             this.gpRelativeSettings.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvRelativeSettings)).EndInit();
+            this.gpLog.ResumeLayout(false);
+            this.gpLog.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -305,14 +347,17 @@
         private System.Windows.Forms.Button btnStart;
         private System.Windows.Forms.GroupBox gpRelativeSettings;
         private System.Windows.Forms.DataGridView dgvRelativeSettings;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Source;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Target;
         private System.Windows.Forms.Label lbYOffset;
         private System.Windows.Forms.TextBox txtY;
         private System.Windows.Forms.Label lbXOffset;
         private System.Windows.Forms.TextBox txtX;
         private System.Windows.Forms.Label lbUnit_1;
         private System.Windows.Forms.Label lbUnit_2;
+        private System.Windows.Forms.Button btnStop;
+        private System.Windows.Forms.TextBox txtLog;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Source;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Target;
+        private System.Windows.Forms.GroupBox gpLog;
     }
 }
 
