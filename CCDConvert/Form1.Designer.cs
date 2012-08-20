@@ -159,8 +159,8 @@
             // tslbSoftware
             // 
             this.tslbSoftware.Name = "tslbSoftware";
-            this.tslbSoftware.Size = new System.Drawing.Size(58, 17);
-            this.tslbSoftware.Text = "Software";
+            this.tslbSoftware.Size = new System.Drawing.Size(78, 17);
+            this.tslbSoftware.Text = "Software OK";
             // 
             // btnStart
             // 
@@ -279,6 +279,7 @@
             this.txtLog.Location = new System.Drawing.Point(17, 21);
             this.txtLog.Multiline = true;
             this.txtLog.Name = "txtLog";
+            this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtLog.Size = new System.Drawing.Size(386, 383);
             this.txtLog.TabIndex = 19;
             // 
