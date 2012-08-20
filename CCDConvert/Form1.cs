@@ -34,6 +34,7 @@ namespace CCDConvert
 
         private double _offset_default_y, offset_y, offset_x;
         private Dictionary<string, string> dicRelative = new Dictionary<string, string>();
+        private bool IsSendData = false;
         #endregion
 
         public FormMain()
@@ -92,7 +93,7 @@ namespace CCDConvert
 
         private void btnStop_Click(object sender, EventArgs e)
         {
-
+            
         }
 
         #region Methods
@@ -346,6 +347,8 @@ namespace CCDConvert
                 recvData = convertData(recvData, _offset_default_y);
                 log.Info("Data converted;[" + recvData + "]");
                 MessageBox.Show(recvData);
+
+
             }
 
             tcpClient.Close();
