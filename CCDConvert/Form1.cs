@@ -381,9 +381,6 @@ namespace CCDConvert
                     recvData = convertData(recvData, _offset_default_y);
                     sendData(recvData);
                 }
-                //ModifyTextBox("Data converted:[" + recvData + "]");
-                //log.Info("Data converted:[" + recvData + "]");
-                //MessageBox.Show(recvData);
             }
 
             tcpClient.Close();
@@ -478,10 +475,5 @@ namespace CCDConvert
 
         }
         #endregion
-
-       
-
-
-
     }
 }
