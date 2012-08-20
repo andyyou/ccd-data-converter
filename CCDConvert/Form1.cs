@@ -28,13 +28,19 @@ namespace CCDConvert
         private static ILog log = LogManager.GetLogger(typeof(Program));
         private static string xmlPath = @"C:\Projects\Github\CCDConvert\CCDConvert\config\config.xml";
 
+        private double _offset_default_y, offset_y, offset_x;
+        private Dictionary<string, string> dicRelative = new Dictionary<string, string>();
+
         // TCP Server
         private TcpListener tcpListener;
         private Thread listenThread;
 
-        private double _offset_default_y, offset_y, offset_x;
-        private Dictionary<string, string> dicRelative = new Dictionary<string, string>();
-        private bool IsSendData = false;
+        // TCP Client
+        private byte[] data = new byte[1024];
+        private TcpClient outputClient;
+        private bool isConnect = false;
+        NetworkStream outputStream;
+
         #endregion
 
         public FormMain()
@@ -45,7 +51,7 @@ namespace CCDConvert
         private void FormMain_Load(object sender, EventArgs e)
         {
             // Initial status image
-            tslbStatus.Image = Properties.Resources.Stop;
+            //tslbStatus.Image = Properties.Resources.Stop;
             tslbHardware.Image = Properties.Resources.Stop;
             tslbSoftware.Image = Properties.Resources.Stop;
 
@@ -87,13 +93,39 @@ namespace CCDConvert
             }
             catch (Exception ex)
             {
-                log.Fatal("!!!Fail to start TCPServer. Error=[" + ex.Message + "]");
+                log.Error("Fail to start TCPServer. Error: " + ex.Message);
             }
+            //if (isConnect) sendData("Server Data!!!");
         }
 
         private void btnStop_Click(object sender, EventArgs e)
         {
-            
+            // Connect to remote server
+            if (!isConnect)
+            {
+                try
+                {
+                    outputClient = new TcpClient(txtDestIP.Text, Convert.ToInt32(txtDestPort.Text));
+                    btnStop.Text = "Stop(&S)";
+                    isConnect = true;
+                    tslbSoftware.Text = "Software OK";
+                    tslbSoftware.Image = Properties.Resources.Run;
+                }
+                catch (SocketException)
+                {
+                    log.Error("Fail to connect to server");
+                    return;
+                }
+            }
+            else
+            {
+                outputStream.Close();
+                outputClient.Close();
+                btnStop.Text = "Send(&S)";
+                isConnect = false;
+                tslbSoftware.Text = "Software Error";
+                tslbSoftware.Image = Properties.Resources.Stop;
+            }
         }
 
         #region Methods
@@ -182,17 +214,17 @@ namespace CCDConvert
         /// </summary>
         /// <param name="input">Source Data</param>
         /// <returns></returns>
-        private string convertData(string input , double default_offset_y)
+        private string convertData(string input, double default_offset_y)
         {
             string pattern = @"^DATA*";
             Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
             Dictionary<string, string> dicOutpout = new Dictionary<string, string>();
-           
+
             if (regex.IsMatch(input))
             {
                 string[] tmp = input.Substring(input.IndexOf(',') + 1).Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                
-                foreach(string i in tmp)
+
+                foreach (string i in tmp)
                 {
                     if (i.IndexOf(',') > 0)
                     {
@@ -210,11 +242,11 @@ namespace CCDConvert
             //double offset_x = double.TryParse(txtX.Text, out offset_x) ? offset_x : 0;
             double y = double.Parse(dicOutpout["FlawMD"]) * 1000 + _offset_default_y + offset_y;
             double x = double.Parse(dicOutpout["FlawCD"]) * 1000 + offset_x;
-             string result = "";
-             if (dicRelative.ContainsKey(dicOutpout["FlawName"]))
-                 result = String.Format("{0};{1};{2}", dicRelative[dicOutpout["FlawName"]], y.ToString(), x.ToString());
-             else
-                 result = String.Format("{0};{1};{2}", "0", y.ToString(), x.ToString());
+            string result = "";
+            if (dicRelative.ContainsKey(dicOutpout["FlawName"]))
+                result = String.Format("{0};{1};{2}", dicRelative[dicOutpout["FlawName"]], y.ToString(), x.ToString());
+            else
+                result = String.Format("{0};{1};{2}", "0", y.ToString(), x.ToString());
 
             return result;
         }
@@ -306,7 +338,7 @@ namespace CCDConvert
             }
             catch (Exception ex)
             {
-                log.Fatal("!!!Fail to ListenForClients. Error=[" + ex.Message + "]");
+                log.Error("Fail to ListenForClients. Error: " + ex.Message);
             }
         }
 
@@ -330,7 +362,7 @@ namespace CCDConvert
                 catch (Exception ex)
                 {
                     //a socket error has occured
-                    log.Fatal("!!!Fail to HandleClientComm. Error=[" + ex.Message + "]");
+                    log.Error("Fail to HandleClientComm. Error: " + ex.Message);
                     break;
                 }
 
@@ -343,15 +375,56 @@ namespace CCDConvert
                 //message has successfully been received
                 UnicodeEncoding encoder = new UnicodeEncoding();
                 string recvData = encoder.GetString(message, 0, bytesRead);
-                log.Info("Data read;[" + recvData + "]");
-                recvData = convertData(recvData, _offset_default_y);
-                log.Info("Data converted;[" + recvData + "]");
-                MessageBox.Show(recvData);
 
-
+                ModifyTextBox("Input: " + recvData);
+                log.Info("Input: " + recvData);
+                if (isConnect)
+                {
+                    recvData = convertData(recvData, _offset_default_y);
+                    sendData(recvData);
+                }
             }
 
             tcpClient.Close();
+        }
+
+        public delegate void ModifyTextBoxDelegate(String s);
+        private void ModifyTextBox(String s)
+        {
+            if (txtLog.InvokeRequired)
+            {
+                ModifyTextBoxDelegate d = new ModifyTextBoxDelegate(ModifyTextBox);
+                this.Invoke(d, s);
+            }
+            else
+            {
+                txtLog.Text = txtLog.Text + s + Environment.NewLine;
+            }
+            return;
+        }
+
+        private void sendData(string output)
+        {
+            try
+            {
+                outputStream = outputClient.GetStream();
+
+                UnicodeEncoding encoder = new UnicodeEncoding();
+                byte[] buffer = encoder.GetBytes(output + "\r");
+                ModifyTextBox("Output: " + output);
+                log.Info("Output: " + output);
+
+                outputStream.Write(buffer, 0, buffer.Length);
+                outputStream.Flush();
+                tslbSoftware.Text = "Software OK";
+                tslbSoftware.Image = Properties.Resources.Run;
+            }
+            catch (NetworkInformationException ex)
+            {
+                tslbSoftware.Text = "Software Error";
+                tslbSoftware.Image = Properties.Resources.Stop;
+                log.Error("Fail to send data. Error: " + ex.Message);
+            }
         }
         
         #endregion
@@ -395,6 +468,7 @@ namespace CCDConvert
             if (drResult == DialogResult.Yes)
             {
                 saveXml(xmlPath, dgvRelativeSettings);
+                log.Info("Application Close");
             }
             else if (drResult == DialogResult.No)
             {
