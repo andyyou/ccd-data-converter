@@ -57,8 +57,6 @@ namespace CCDConvert
             // ** Notice : Before use [converData] need run again. 本來要將Relative的資料綁入converData 但效能差了2倍 
             updateDictionaryRelative();
 
-           
-
             if (IsConfigured)
             {
                 Stopwatch sw = new Stopwatch();
