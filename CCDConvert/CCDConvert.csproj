@@ -78,6 +78,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="log4net\log4net.dll" />
+    <None Include="Resources\Stop.png" />
+    <None Include="Resources\Run.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="image\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
