@@ -28,6 +28,10 @@ namespace CCDConvert
         private static ILog log = LogManager.GetLogger(typeof(Program));
         private static string xmlPath = @"C:\Projects\Github\CCDConvert\CCDConvert\config\config.xml";
 
+        // TCP Server
+        private TcpListener tcpListener;
+        private Thread listenThread;
+
         private double _offset_default_y, offset_y, offset_x;
         private Dictionary<string, string> dicRelative = new Dictionary<string, string>();
         #endregion
@@ -57,19 +61,38 @@ namespace CCDConvert
             // ** Notice : Before use [converData] need run again. 本來要將Relative的資料綁入converData 但效能差了2倍 
             updateDictionaryRelative();
 
-            if (IsConfigured)
-            {
-                Stopwatch sw = new Stopwatch();
-                sw.Start();
-                convertData("DATA,FlawID,0;FlawName,WS;FlawMD,0.804000;FlawCD,0.924000;JobID,231tst-13;", _offset_default_y);
-                sw.Stop();
-                MessageBox.Show(sw.Elapsed.ToString());
-            }
+            //if (IsConfigured)
+            //{
+            //    Stopwatch sw = new Stopwatch();
+            //    sw.Start();
+            //    convertData("DATA,FlawID,0;FlawName,WS;FlawMD,0.804000;FlawCD,0.924000;JobID,231tst-13;", _offset_default_y);
+            //    sw.Stop();
+            //    MessageBox.Show(sw.Elapsed.ToString());
+            //}
         }
 
         private void btnStart_Click(object sender, EventArgs e)
         {
             // Start TCP Server
+            try
+            {
+                btnStart.Enabled = false;
+                tcpListener = new TcpListener(IPAddress.Parse(txtSourceIP.Text), Convert.ToInt32(txtSourcePort.Text));
+                listenThread = new Thread(new ThreadStart(ListenForClients));
+                listenThread.IsBackground = true;
+                listenThread.Start();
+
+                log.Info("Success to start TCPServer");
+            }
+            catch (Exception ex)
+            {
+                log.Fatal("!!!Fail to start TCPServer. Error=[" + ex.Message + "]");
+            }
+        }
+
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+
         }
 
         #region Methods
@@ -91,6 +114,7 @@ namespace CCDConvert
                     tslbHardware.Image = imgStop;
                 }
             }
+
         }
 
         //將DataGridView的對資料轉存成Dictionary提升效能
@@ -169,8 +193,14 @@ namespace CCDConvert
                 
                 foreach(string i in tmp)
                 {
-                    string[] sp = i.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                    dicOutpout.Add(sp[0].ToString(), sp[1].ToString());
+                    if (i.IndexOf(',') > 0)
+                    {
+                        string[] sp = i.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                        if ((i.IndexOf(',') > 0) && (!dicOutpout.ContainsKey(sp[0].ToString())))
+                        {
+                            dicOutpout.Add(sp[0].ToString(), sp[1].ToString());
+                        }
+                    }
                 }
             }
 
@@ -254,6 +284,71 @@ namespace CCDConvert
                
             }
             document.Save(path); 
+        }
+
+        private void ListenForClients()
+        {
+            try
+            {
+                tcpListener.Start();
+                while (true)
+                {
+                    //blocks until a client has connected to the server
+                    TcpClient client = this.tcpListener.AcceptTcpClient();
+
+                    //create a thread to handle communication
+                    //with connected client
+                    Thread clientThread = new Thread(new ParameterizedThreadStart(HandleClientComm));
+                    clientThread.IsBackground = true;
+                    clientThread.Start(client);
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Fatal("!!!Fail to ListenForClients. Error=[" + ex.Message + "]");
+            }
+        }
+
+        private void HandleClientComm(object client)
+        {
+            TcpClient tcpClient = (TcpClient)client;
+            NetworkStream clientStream = tcpClient.GetStream();
+
+            byte[] message = new byte[4096];
+            int bytesRead;
+
+            while (true)
+            {
+                bytesRead = 0;
+
+                try
+                {
+                    //blocks until a client sends a message
+                    bytesRead = clientStream.Read(message, 0, 4096);
+                }
+                catch (Exception ex)
+                {
+                    //a socket error has occured
+                    log.Fatal("!!!Fail to HandleClientComm. Error=[" + ex.Message + "]");
+                    break;
+                }
+
+                if (bytesRead == 0)
+                {
+                    //the client has disconnected from the server
+                    break;
+                }
+
+                //message has successfully been received
+                UnicodeEncoding encoder = new UnicodeEncoding();
+                string recvData = encoder.GetString(message, 0, bytesRead);
+                log.Info("Data read;[" + recvData + "]");
+                recvData = convertData(recvData, _offset_default_y);
+                log.Info("Data converted;[" + recvData + "]");
+                MessageBox.Show(recvData);
+            }
+
+            tcpClient.Close();
         }
         
         #endregion

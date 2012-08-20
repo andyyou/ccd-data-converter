@@ -272,6 +272,7 @@
             this.btnStop.TabIndex = 18;
             this.btnStop.Text = "Send(&S)";
             this.btnStop.UseVisualStyleBackColor = true;
+            this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
             // 
             // txtLog
             // 
