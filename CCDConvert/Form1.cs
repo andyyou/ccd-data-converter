@@ -26,7 +26,7 @@ namespace CCDConvert
         #region Local variables
 
         private static ILog log = LogManager.GetLogger(typeof(Program));
-        private static string xmlPath = @"C:\Workspace\GitHub\ccd_data_converter\CCDConvert\config\config.xml";
+        private static string xmlPath = @"C:\Projects\Github\CCDConvert\CCDConvert\config\config.xml";
 
         private double _offset_default_y, offset_y, offset_x;
         private Dictionary<string, string> dicRelative = new Dictionary<string, string>();
@@ -147,6 +147,7 @@ namespace CCDConvert
                     tslbHardware.Image = imgStop;
                 }
             }
+
         }
 
         //將DataGridView的對資料轉存成Dictionary提升效能
@@ -218,7 +219,7 @@ namespace CCDConvert
             string pattern = @"^DATA*";
             Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
             Dictionary<string, string> dicOutpout = new Dictionary<string, string>();
-
+            string result = "";
             if (regex.IsMatch(input))
             {
                 string[] tmp = input.Substring(input.IndexOf(',') + 1).Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
@@ -234,18 +235,22 @@ namespace CCDConvert
                         }
                     }
                 }
-            }
 
-            // Deal format string
-            //double offset_y = double.TryParse(txtY.Text, out offset_y) ? offset_y : 0;
-            //double offset_x = double.TryParse(txtX.Text, out offset_x) ? offset_x : 0;
-            double y = double.Parse(dicOutpout["FlawMD"]) * 1000 + _offset_default_y + offset_y;
-            double x = double.Parse(dicOutpout["FlawCD"]) * 1000 + offset_x;
-            string result = "";
-            if (dicRelative.ContainsKey(dicOutpout["FlawName"]))
-                result = String.Format("{0};{1};{2}", dicRelative[dicOutpout["FlawName"]], y.ToString(), x.ToString());
+                // Deal format string
+                //double offset_y = double.TryParse(txtY.Text, out offset_y) ? offset_y : 0;
+                //double offset_x = double.TryParse(txtX.Text, out offset_x) ? offset_x : 0;
+                double y = double.Parse(dicOutpout["FlawMD"]) * 1000 + _offset_default_y + offset_y;
+                double x = double.Parse(dicOutpout["FlawCD"]) * 1000 + offset_x;
+
+                if (dicRelative.ContainsKey(dicOutpout["FlawName"]))
+                    result = String.Format("{0};{1};{2}", dicRelative[dicOutpout["FlawName"]], y.ToString(), x.ToString());
+                else
+                    result = String.Format("{0};{1};{2}", "0", y.ToString(), x.ToString());
+            }
             else
-                result = String.Format("{0};{1};{2}", "0", y.ToString(), x.ToString());
+            {
+                result = input;
+            }
 
             return result;
         }
@@ -374,6 +379,7 @@ namespace CCDConvert
                 //message has successfully been received
                 UnicodeEncoding encoder = new UnicodeEncoding();
                 string recvData = encoder.GetString(message, 0, bytesRead);
+
                 ModifyTextBox("Input: " + recvData);
                 log.Info("Input: " + recvData);
                 if (isConnect)
@@ -401,6 +407,9 @@ namespace CCDConvert
             return;
         }
 
+        private void sendResponse()
+        { 
+        }
         private void sendData(string output)
         {
             try
