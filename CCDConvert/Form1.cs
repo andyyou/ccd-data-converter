@@ -32,17 +32,16 @@ namespace CCDConvert
         private Dictionary<string, string> dicRelative = new Dictionary<string, string>();
 
         // TCP Server
-        private TcpListener tcpListener;
-        private Thread listenThread;
+        private Socket responseSocket;
+        private static ArrayList receiveData = new ArrayList(100);
+        private bool clearLog = false;
+        private static string tmpLog = "";
+        private static string memLock = "+";
 
         // TCP Client
         private TcpClient outputClient;
         private bool isConnect = false;
         NetworkStream outputStream;
-
-        // TCP Server Response
-        private TcpClient responseClient;
-        NetworkStream responseStream;
 
         #endregion
 
@@ -54,9 +53,9 @@ namespace CCDConvert
         private void FormMain_Load(object sender, EventArgs e)
         {
             // Initial status image
-            //tslbStatus.Image = Properties.Resources.Stop;
             tslbHardware.Image = Properties.Resources.Stop;
-            tslbSoftware.Image = Properties.Resources.Stop;
+            tslbSoftware.Text = "Software Idle";
+            tslbSoftware.Image = Properties.Resources.Run;
 
             // Load log4net config file
             XmlConfigurator.Configure(new FileInfo("log4netconfig.xml"));
@@ -64,51 +63,18 @@ namespace CCDConvert
             networkThread.IsBackground = true;
             networkThread.Start();
 
-
             // Load xml config , this is first step.
             bool IsConfigured = getXml(xmlPath, dgvRelativeSettings);
 
             // ** Notice : Before use [converData] need run again. 本來要將Relative的資料綁入converData 但效能差了2倍 
             updateDictionaryRelative();
-
-            //if (IsConfigured)
-            //{
-            //    Stopwatch sw = new Stopwatch();
-            //    sw.Start();
-            //    convertData("DATA,FlawID,0;FlawName,WS;FlawMD,0.804000;FlawCD,0.924000;JobID,231tst-13;", _offset_default_y);
-            //    sw.Stop();
-            //    MessageBox.Show(sw.Elapsed.ToString());
-            //}
         }
 
         private void btnStart_Click(object sender, EventArgs e)
         {
-            // Start TCP Server
-            try
-            {
-                btnStart.Enabled = false;
-                tcpListener = new TcpListener(IPAddress.Parse(txtSourceIP.Text), Convert.ToInt32(txtSourcePort.Text));
-                listenThread = new Thread(new ThreadStart(ListenForClients));
-                listenThread.IsBackground = true;
-                listenThread.Start();
-
-                log.Info("Success to start TCPServer");
-            }
-            catch (Exception ex)
-            {
-                log.Error("Fail to start TCPServer. Error: " + ex.Message);
-            }
-            
-            // Connect to web ranger system(For response message)
-            try
-            {
-                responseClient = new TcpClient("192.168.1.150", 100);
-            }
-            catch (SocketException)
-            {
-                log.Error("Fail to connect web ranger system");
-                return;
-            }
+            btnStart.Enabled = false;
+            tslbSoftware.Text = "Software Listening";
+            this.Listen();
         }
 
         private void btnStop_Click(object sender, EventArgs e)
@@ -121,12 +87,12 @@ namespace CCDConvert
                     outputClient = new TcpClient(txtDestIP.Text, Convert.ToInt32(txtDestPort.Text));
                     btnStop.Text = "Stop(&S)";
                     isConnect = true;
-                    tslbSoftware.Text = "Software OK";
+                    tslbSoftware.Text = "Software Listening-Sending";
                     tslbSoftware.Image = Properties.Resources.Run;
                 }
-                catch (SocketException)
+                catch (SocketException ex)
                 {
-                    log.Error("Fail to connect remote server");
+                    log.Error(String.Format("Fail to connect remote server. Error: {0}", ex.Message));
                     return;
                 }
             }
@@ -136,7 +102,7 @@ namespace CCDConvert
                 outputClient.Close();
                 btnStop.Text = "Send(&S)";
                 isConnect = false;
-                tslbSoftware.Text = "Software Error";
+                tslbSoftware.Text = "Software Listening";
                 tslbSoftware.Image = Properties.Resources.Stop;
             }
         }
@@ -336,127 +302,199 @@ namespace CCDConvert
             document.Save(path); 
         }
 
-        private void ListenForClients()
+        public void updateLogText()
         {
-            try
+            if (clearLog)
             {
-                tcpListener.Start();
-                while (true)
-                {
-                    //blocks until a client has connected to the server
-                    TcpClient client = this.tcpListener.AcceptTcpClient();
-
-                    //create a thread to handle communication
-                    //with connected client
-                    Thread clientThread = new Thread(new ParameterizedThreadStart(HandleClientComm));
-                    clientThread.IsBackground = true;
-                    clientThread.Start(client);
-                }
+                txtLog.Text = "";
+                clearLog = false;
             }
-            catch (Exception ex)
+            string text = txtLog.Text;
+            lock (memLock)
             {
-                log.Error("Fail to ListenForClients. Error: " + ex.Message);
+                this.txtLog.Text = tmpLog;
+                tmpLog = "";
             }
+            this.txtLog.AppendText(text);
+            this.txtLog.Select(0, 0);
+            this.txtLog.ScrollToCaret();
         }
 
-        private void HandleClientComm(object client)
+        public delegate void updateLog();
+
+        public void AcceptCallback(IAsyncResult ar)
         {
-            TcpClient tcpClient = (TcpClient)client;
-            NetworkStream clientStream = tcpClient.GetStream();
-
-            byte[] message = new byte[4096];
-            int bytesRead;
-
+            bool flag;
+            Socket asyncSocket = ((Socket)ar.AsyncState).EndAccept(ar);
+            if ((asyncSocket == null) || !asyncSocket.Connected)
+            {
+                return;
+            }
+            asyncSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 1000);
+            asyncSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, 1000);
+            asyncSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, 512);
+            string str = "";
+            string responseData = "";
+            string str3 = "";
             while (true)
             {
-                bytesRead = 0;
-
+                flag = false;
+                int count = 0;
+                str3 = "";
+                byte[] bytes = new byte[512];
                 try
                 {
-                    //blocks until a client sends a message
-                    bytesRead = clientStream.Read(message, 0, 4096);
+                    count = asyncSocket.Receive(bytes);
                 }
-                catch (Exception ex)
+                catch (SocketException exception)
                 {
-                    //a socket error has occured
-                    log.Error("Fail to HandleClientComm. Error: " + ex.Message);
-                    break;
+                    if ((exception.ErrorCode == 10060) || (exception.ErrorCode == 10035))
+                    {
+                        continue;
+                    }
+                    this.Listen();
+                    return;
                 }
-
-                if (bytesRead == 0)
+                if (count <= 0)
                 {
-                    //the client has disconnected from the server
-                    break;
+                    if (true)
+                    {
+                        this.Listen();
+                        return;
+                    }
                 }
-
-                //message has successfully been received
-                UnicodeEncoding encoder = new UnicodeEncoding();
-                string recvData = encoder.GetString(message, 0, bytesRead);
-
-                ModifyTextBox("Input: " + recvData);
-                log.Info("Input: " + recvData);
-
-                switch (recvData)
+                else
                 {
-                    case "Rdy4_Xmit?\r":
-                        sendResponse("Send_New");
-                        break;
-
-                    case "GetStatus\r":
-                        sendResponse("Device_OK");
-                        break;
-
-                    default:
-                        if (isConnect)
+                    string str4 = Encoding.Unicode.GetString(bytes, 0, count);
+                    if (str.Length > 0)
+                    {
+                        str4 = str + str4;
+                        str = "";
+                    }
+                    if (str4.Length > 0)
+                    {
+                        int num2 = str4.LastIndexOf("\r");
+                        if (num2 == -1)
                         {
-                            recvData = convertData(recvData, _offset_default_y);
-                            sendData(recvData);
+                            str = str4;
+                            str4 = "";
                         }
-                        break;
+                        else if (num2 < (str4.Length - 1))
+                        {
+                            str = str4.Substring(num2 + 1);
+                            str4 = str4.Remove(num2 + 1, (str4.Length - num2) - 1);
+                        }
+                        foreach (string str7 in str4.Split(new char[] { '\r' }))
+                        {
+                            if (str7.Length >= 1)
+                            {
+                                receiveData.Add(str7);
+                            }
+                        }
+                    }
+                    while (receiveData.Count > 0)
+                    {
+                        string str8 = (string)receiveData[0];
+                        receiveData.RemoveAt(0);
+                        str3 = String.Format("Receive: {0}\r\n", str8);
+                        log.Info(String.Format("Receive: {0}", str8));
+                        if (str8.CompareTo("GetStatus") == 0)
+                        {
+                            responseData = "Device_OK\r";
+                            flag = true;
+                        }
+                        else if (str8.CompareTo("Rdy4_Xmit?") == 0)
+                        {
+                            responseData = "Send_All\r";
+                            clearLog = true;
+                            flag = true;
+                        }
+                        if (flag)
+                        {
+                            bytes = Encoding.Unicode.GetBytes(responseData);
+                            int responseDataLength = 0;
+                            try
+                            {
+                                responseDataLength = asyncSocket.Send(bytes);
+                            }
+                            catch (SocketException exception2)
+                            {
+                                if ((exception2.ErrorCode == 10060) || (exception2.ErrorCode == 10035))
+                                {
+                                    continue;
+                                }
+                                this.Listen();
+                                break;
+                            }
+                            if (responseDataLength > 0)
+                            {
+                                str3 = String.Format("Response: {0}\r\n", responseData.Substring(0, responseData.Length - 1));
+                            }
+                        }
+                        lock (memLock)
+                        {
+                            tmpLog = str3;
+                        }
+                        updateLog method = new updateLog(this.updateLogText);
+                        this.txtLog.Invoke(method);
+                        if (isConnect && flag != true)
+                        {
+                            sendData(convertData(str8, _offset_default_y));
+                        }
+                    }
                 }
-                //if (isConnect)
-                //{
-                //    recvData = convertData(recvData, _offset_default_y);
-                //    sendData(recvData);
-                //}
             }
-
-            tcpClient.Close();
         }
 
-        public delegate void ModifyTextBoxDelegate(String s);
-        private void ModifyTextBox(String s)
+        public void Listen()
         {
-            if (txtLog.InvokeRequired)
+            this.Shutdown();
+            if (responseSocket == null)
             {
-                ModifyTextBoxDelegate d = new ModifyTextBoxDelegate(ModifyTextBox);
-                this.Invoke(d, s);
+                try
+                {
+                    IPAddress address = IPAddress.Parse(txtSourceIP.Text);
+                    int port = Convert.ToInt32(txtSourcePort.Text);
+                    IPEndPoint localEP = new IPEndPoint(address, port);
+                    responseSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    LingerOption optionValue = new LingerOption(false, 0);
+                    responseSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, optionValue);
+                    responseSocket.Bind(localEP);
+                    responseSocket.Listen(1);
+                    responseSocket.BeginAccept(new AsyncCallback(this.AcceptCallback), responseSocket);
+                }
+                catch (Exception exception)
+                {
+                    MessageBox.Show(exception.Message);
+                }
             }
-            else
-            {
-                txtLog.Text = txtLog.Text + s + Environment.NewLine;
-            }
-            return;
         }
 
-        private void sendResponse(string response)
+        private void Shutdown()
         {
-            try
+            if (responseSocket != null)
             {
-                responseStream = responseClient.GetStream();
-
-                UnicodeEncoding encoder = new UnicodeEncoding();
-                byte[] buffer = encoder.GetBytes(response + "\r");
-                ModifyTextBox("Response: " + response);
-                log.Info("Response: " + response);
-
-                responseStream.Write(buffer, 0, buffer.Length);
-                responseStream.Flush();
+                try
+                {
+                    responseSocket.Shutdown(SocketShutdown.Both);
+                }
+                catch (Exception)
+                {
+                }
+                try
+                {
+                    responseSocket.Close();
+                }
+                catch (Exception)
+                {
+                }
+                responseSocket = null;
             }
-            catch (NetworkInformationException ex)
-            {
-                log.Error("Fail to response data. Error: " + ex.Message);
-            } 
+        }
+
+        private bool TestConnection()
+        {
+            return false;
         }
 
         private void sendData(string output)
@@ -466,20 +504,22 @@ namespace CCDConvert
                 outputStream = outputClient.GetStream();
 
                 UnicodeEncoding encoder = new UnicodeEncoding();
-                byte[] buffer = encoder.GetBytes(output + "\r");
-                ModifyTextBox("Output: " + output);
-                log.Info("Output: " + output);
+                byte[] buffer = encoder.GetBytes(String.Format("{0}\r",output));
 
                 outputStream.Write(buffer, 0, buffer.Length);
                 outputStream.Flush();
                 tslbSoftware.Text = "Software OK";
                 tslbSoftware.Image = Properties.Resources.Run;
+                tmpLog = String.Format("Output: {0}\r\n", output);
+                updateLog method = new updateLog(this.updateLogText);
+                this.txtLog.Invoke(method);
+                log.Info(String.Format("Output: {0}", output));
             }
             catch (NetworkInformationException ex)
             {
                 tslbSoftware.Text = "Software Error";
                 tslbSoftware.Image = Properties.Resources.Stop;
-                log.Error("Fail to send data. Error: " + ex.Message);
+                log.Error(String.Format("Fail to send data. Error: {0}", ex.Message));
             }
         }
         
