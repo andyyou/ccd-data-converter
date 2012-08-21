@@ -26,7 +26,7 @@ namespace CCDConvert
         #region Local variables
 
         private static ILog log = LogManager.GetLogger(typeof(Program));
-        private static string xmlPath = @"C:\Projects\Github\CCDConvert\CCDConvert\config\config.xml";
+        private static string xmlPath = @"C:\Workspace\GitHub\ccd_data_converter\CCDConvert\config\config.xml";
 
         private double _offset_default_y, offset_y, offset_x;
         private Dictionary<string, string> dicRelative = new Dictionary<string, string>();
@@ -36,10 +36,13 @@ namespace CCDConvert
         private Thread listenThread;
 
         // TCP Client
-        private byte[] data = new byte[1024];
         private TcpClient outputClient;
         private bool isConnect = false;
         NetworkStream outputStream;
+
+        // TCP Server Response
+        private TcpClient responseClient;
+        NetworkStream responseStream;
 
         #endregion
 
@@ -95,7 +98,17 @@ namespace CCDConvert
             {
                 log.Error("Fail to start TCPServer. Error: " + ex.Message);
             }
-            //if (isConnect) sendData("Server Data!!!");
+            
+            // Connect to web ranger system(For response message)
+            try
+            {
+                responseClient = new TcpClient("192.168.1.150", 100);
+            }
+            catch (SocketException)
+            {
+                log.Error("Fail to connect web ranger system");
+                return;
+            }
         }
 
         private void btnStop_Click(object sender, EventArgs e)
@@ -113,7 +126,7 @@ namespace CCDConvert
                 }
                 catch (SocketException)
                 {
-                    log.Error("Fail to connect to server");
+                    log.Error("Fail to connect remote server");
                     return;
                 }
             }
@@ -382,11 +395,30 @@ namespace CCDConvert
 
                 ModifyTextBox("Input: " + recvData);
                 log.Info("Input: " + recvData);
-                if (isConnect)
+
+                switch (recvData)
                 {
-                    recvData = convertData(recvData, _offset_default_y);
-                    sendData(recvData);
+                    case "Rdy4_Xmit?\r":
+                        sendResponse("Send_New");
+                        break;
+
+                    case "GetStatus\r":
+                        sendResponse("Device_OK");
+                        break;
+
+                    default:
+                        if (isConnect)
+                        {
+                            recvData = convertData(recvData, _offset_default_y);
+                            sendData(recvData);
+                        }
+                        break;
                 }
+                //if (isConnect)
+                //{
+                //    recvData = convertData(recvData, _offset_default_y);
+                //    sendData(recvData);
+                //}
             }
 
             tcpClient.Close();
@@ -407,9 +439,26 @@ namespace CCDConvert
             return;
         }
 
-        private void sendResponse()
-        { 
+        private void sendResponse(string response)
+        {
+            try
+            {
+                responseStream = responseClient.GetStream();
+
+                UnicodeEncoding encoder = new UnicodeEncoding();
+                byte[] buffer = encoder.GetBytes(response + "\r");
+                ModifyTextBox("Response: " + response);
+                log.Info("Response: " + response);
+
+                responseStream.Write(buffer, 0, buffer.Length);
+                responseStream.Flush();
+            }
+            catch (NetworkInformationException ex)
+            {
+                log.Error("Fail to response data. Error: " + ex.Message);
+            } 
         }
+
         private void sendData(string output)
         {
             try
