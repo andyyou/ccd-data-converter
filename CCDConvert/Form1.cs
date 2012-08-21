@@ -26,6 +26,10 @@ namespace CCDConvert
         #region Local variables
 
         private static ILog log = LogManager.GetLogger(typeof(Program));
+        private bool createNewLogFirst = true;
+        private bool needCreateNewLog = false;
+        private string jobID = "";
+        private string[] outputLog = new string[5];
         private static string xmlPath = @"C:\Workspace\GitHub\ccd_data_converter\CCDConvert\config\config.xml";
 
         private double _offset_default_y, offset_y, offset_x;
@@ -35,7 +39,7 @@ namespace CCDConvert
         private Socket responseSocket;
         private static ArrayList receiveData = new ArrayList(100);
         private bool clearLog = false;
-        private static string tmpLog = "";
+        private static string tmpUILog = "";
         private static string memLock = "+";
 
         // TCP Client
@@ -58,7 +62,7 @@ namespace CCDConvert
             tslbSoftware.Image = Properties.Resources.Run;
 
             // Load log4net config file
-            XmlConfigurator.Configure(new FileInfo("log4netconfig.xml"));
+            //XmlConfigurator.Configure(new FileInfo("log4netconfig.xml"));
             Thread networkThread = new Thread(new ThreadStart(updateNetworkStatus));
             networkThread.IsBackground = true;
             networkThread.Start();
@@ -90,9 +94,10 @@ namespace CCDConvert
                     tslbSoftware.Text = "Software Listening-Sending";
                     tslbSoftware.Image = Properties.Resources.Run;
                 }
-                catch (SocketException ex)
+                catch (SocketException)
                 {
-                    log.Error(String.Format("Fail to connect remote server. Error: {0}", ex.Message));
+                    outputLog[0] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                    outputLog[1] = "Software Error";
                     return;
                 }
             }
@@ -218,6 +223,7 @@ namespace CCDConvert
                 // Deal format string
                 //double offset_y = double.TryParse(txtY.Text, out offset_y) ? offset_y : 0;
                 //double offset_x = double.TryParse(txtX.Text, out offset_x) ? offset_x : 0;
+                jobID = dicOutpout["JobID"];
                 double y = double.Parse(dicOutpout["FlawMD"]) * 1000 + _offset_default_y + offset_y;
                 double x = double.Parse(dicOutpout["FlawCD"]) * 1000 + offset_x;
 
@@ -312,8 +318,8 @@ namespace CCDConvert
             string text = txtLog.Text;
             lock (memLock)
             {
-                this.txtLog.Text = tmpLog;
-                tmpLog = "";
+                this.txtLog.Text = tmpUILog;
+                tmpUILog = "";
             }
             this.txtLog.AppendText(text);
             this.txtLog.Select(0, 0);
@@ -338,6 +344,7 @@ namespace CCDConvert
             string str3 = "";
             while (true)
             {
+                outputLog = new string[5];
                 flag = false;
                 int count = 0;
                 str3 = "";
@@ -397,7 +404,9 @@ namespace CCDConvert
                         string str8 = (string)receiveData[0];
                         receiveData.RemoveAt(0);
                         str3 = String.Format("Receive: {0}\r\n", str8);
-                        log.Info(String.Format("Receive: {0}", str8));
+                        outputLog[0] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                        outputLog[1] = str8;
+                        outputLog[4] = "N";
                         if (str8.CompareTo("GetStatus") == 0)
                         {
                             responseData = "Device_OK\r";
@@ -408,6 +417,7 @@ namespace CCDConvert
                             responseData = "Send_All\r";
                             clearLog = true;
                             flag = true;
+                            needCreateNewLog = true;
                         }
                         if (flag)
                         {
@@ -433,14 +443,28 @@ namespace CCDConvert
                         }
                         lock (memLock)
                         {
-                            tmpLog = str3;
+                            tmpUILog = str3;
                         }
                         updateLog method = new updateLog(this.updateLogText);
                         this.txtLog.Invoke(method);
+
+                        string convertedData = convertData(str8, _offset_default_y);
                         if (isConnect && flag != true)
                         {
-                            sendData(convertData(str8, _offset_default_y));
+                            sendData(convertedData);
                         }
+                        if (createNewLogFirst && jobID != "")
+                        {
+                            setLogFile();
+                            XmlConfigurator.Configure(new FileInfo("log4netconfig.xml"));
+                            createNewLogFirst = false;
+                        }
+                        else if (needCreateNewLog && createNewLogFirst == false)
+                        {
+                            createNewLogFile();
+                            needCreateNewLog = false;
+                        }
+                        log.Info(String.Format("{0};{1};{2};{3};{4}", outputLog[0], outputLog[1], outputLog[2], outputLog[3], outputLog[4]));
                     }
                 }
             }
@@ -508,21 +532,48 @@ namespace CCDConvert
 
                 outputStream.Write(buffer, 0, buffer.Length);
                 outputStream.Flush();
+                outputLog[2] = output;
+                outputLog[3] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                outputLog[4] = "Y";
                 tslbSoftware.Text = "Software OK";
                 tslbSoftware.Image = Properties.Resources.Run;
-                tmpLog = String.Format("Output: {0}\r\n", output);
+                tmpUILog = String.Format("Output: {0}\r\n", output);
                 updateLog method = new updateLog(this.updateLogText);
                 this.txtLog.Invoke(method);
-                log.Info(String.Format("Output: {0}", output));
             }
             catch (NetworkInformationException ex)
             {
                 tslbSoftware.Text = "Software Error";
                 tslbSoftware.Image = Properties.Resources.Stop;
-                log.Error(String.Format("Fail to send data. Error: {0}", ex.Message));
+                outputLog[2] = "Software Error";
+                outputLog[4] = "N";
             }
         }
-        
+
+        private void setLogFile()
+        {
+            string logName = String.Format("JobId_{0}.csv", System.DateTime.Now.ToString("yyyyMMddHHmmss"));
+            log4net.GlobalContext.Properties["LogName"] = logName;
+        }
+
+        public static bool createNewLogFile()
+        {
+            string logName = String.Format("JobId_{0}.csv", System.DateTime.Now.ToString("yyyyMMddHHmmss"));
+
+            var rootRepository = log4net.LogManager.GetRepository();
+            foreach (var appender in rootRepository.GetAppenders())
+            {
+                if (appender.Name.Equals("fileAppender") && appender is log4net.Appender.FileAppender)
+                {
+                    var fileAppender = appender as log4net.Appender.FileAppender;
+                    fileAppender.File = logName;
+                    fileAppender.ActivateOptions();
+                    return true;  // Appender found and name changed to NewFilename
+                }
+            }
+            return false; // appender not found
+        }
+
         #endregion
 
         #region Event
@@ -564,7 +615,6 @@ namespace CCDConvert
             if (drResult == DialogResult.Yes)
             {
                 saveXml(xmlPath, dgvRelativeSettings);
-                log.Info("Application Close");
             }
             else if (drResult == DialogResult.No)
             {
