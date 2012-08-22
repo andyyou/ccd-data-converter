@@ -26,17 +26,23 @@ namespace CCDConvert
         #region Local variables
 
         private static ILog log = LogManager.GetLogger(typeof(Program));
-        private static string xmlPath = @"C:\Projects\Github\CCDConvert\CCDConvert\config\config.xml";
+        private bool createNewLogFirst = true;
+        private bool needCreateNewLog = false;
+        private string jobID = "";
+        private string[] outputLog = new string[5];
+        private static string xmlPath = @"C:\Workspace\GitHub\ccd_data_converter\CCDConvert\config\config.xml";
 
         private double _offset_default_y, offset_y, offset_x;
         private Dictionary<string, string> dicRelative = new Dictionary<string, string>();
 
         // TCP Server
-        private TcpListener tcpListener;
-        private Thread listenThread;
+        private Socket responseSocket;
+        private static ArrayList receiveData = new ArrayList(100);
+        private bool clearLog = false;
+        private static string tmpUILog = "";
+        private static string memLock = "+";
 
         // TCP Client
-        private byte[] data = new byte[1024];
         private TcpClient outputClient;
         private bool isConnect = false;
         NetworkStream outputStream;
@@ -51,51 +57,28 @@ namespace CCDConvert
         private void FormMain_Load(object sender, EventArgs e)
         {
             // Initial status image
-            //tslbStatus.Image = Properties.Resources.Stop;
             tslbHardware.Image = Properties.Resources.Stop;
-            tslbSoftware.Image = Properties.Resources.Stop;
+            tslbSoftware.Text = "Software Idle";
+            tslbSoftware.Image = Properties.Resources.Run;
 
             // Load log4net config file
-            XmlConfigurator.Configure(new FileInfo("log4netconfig.xml"));
+            //XmlConfigurator.Configure(new FileInfo("log4netconfig.xml"));
             Thread networkThread = new Thread(new ThreadStart(updateNetworkStatus));
             networkThread.IsBackground = true;
             networkThread.Start();
-
 
             // Load xml config , this is first step.
             bool IsConfigured = getXml(xmlPath, dgvRelativeSettings);
 
             // ** Notice : Before use [converData] need run again. 本來要將Relative的資料綁入converData 但效能差了2倍 
             updateDictionaryRelative();
-
-            //if (IsConfigured)
-            //{
-            //    Stopwatch sw = new Stopwatch();
-            //    sw.Start();
-            //    convertData("DATA,FlawID,0;FlawName,WS;FlawMD,0.804000;FlawCD,0.924000;JobID,231tst-13;", _offset_default_y);
-            //    sw.Stop();
-            //    MessageBox.Show(sw.Elapsed.ToString());
-            //}
         }
 
         private void btnStart_Click(object sender, EventArgs e)
         {
-            // Start TCP Server
-            try
-            {
-                btnStart.Enabled = false;
-                tcpListener = new TcpListener(IPAddress.Parse(txtSourceIP.Text), Convert.ToInt32(txtSourcePort.Text));
-                listenThread = new Thread(new ThreadStart(ListenForClients));
-                listenThread.IsBackground = true;
-                listenThread.Start();
-
-                log.Info("Success to start TCPServer");
-            }
-            catch (Exception ex)
-            {
-                log.Error("Fail to start TCPServer. Error: " + ex.Message);
-            }
-            //if (isConnect) sendData("Server Data!!!");
+            btnStart.Enabled = false;
+            tslbSoftware.Text = "Software Listening";
+            this.Listen();
         }
 
         private void btnStop_Click(object sender, EventArgs e)
@@ -108,12 +91,13 @@ namespace CCDConvert
                     outputClient = new TcpClient(txtDestIP.Text, Convert.ToInt32(txtDestPort.Text));
                     btnStop.Text = "Stop(&S)";
                     isConnect = true;
-                    tslbSoftware.Text = "Software OK";
+                    tslbSoftware.Text = "Software Listening-Sending";
                     tslbSoftware.Image = Properties.Resources.Run;
                 }
                 catch (SocketException)
                 {
-                    log.Error("Fail to connect to server");
+                    outputLog[0] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                    outputLog[1] = "Software Error";
                     return;
                 }
             }
@@ -123,7 +107,7 @@ namespace CCDConvert
                 outputClient.Close();
                 btnStop.Text = "Send(&S)";
                 isConnect = false;
-                tslbSoftware.Text = "Software Error";
+                tslbSoftware.Text = "Software Listening";
                 tslbSoftware.Image = Properties.Resources.Stop;
             }
         }
@@ -239,6 +223,7 @@ namespace CCDConvert
                 // Deal format string
                 //double offset_y = double.TryParse(txtY.Text, out offset_y) ? offset_y : 0;
                 //double offset_x = double.TryParse(txtX.Text, out offset_x) ? offset_x : 0;
+                jobID = dicOutpout["JobID"];
                 double y = double.Parse(dicOutpout["FlawMD"]) * 1000 + _offset_default_y + offset_y;
                 double x = double.Parse(dicOutpout["FlawCD"]) * 1000 + offset_x;
 
@@ -323,93 +308,219 @@ namespace CCDConvert
             document.Save(path); 
         }
 
-        private void ListenForClients()
+        public void updateLogText()
         {
-            try
+            if (clearLog)
             {
-                tcpListener.Start();
-                while (true)
-                {
-                    //blocks until a client has connected to the server
-                    TcpClient client = this.tcpListener.AcceptTcpClient();
-
-                    //create a thread to handle communication
-                    //with connected client
-                    Thread clientThread = new Thread(new ParameterizedThreadStart(HandleClientComm));
-                    clientThread.IsBackground = true;
-                    clientThread.Start(client);
-                }
+                txtLog.Text = "";
+                clearLog = false;
             }
-            catch (Exception ex)
+            string text = txtLog.Text;
+            lock (memLock)
             {
-                log.Error("Fail to ListenForClients. Error: " + ex.Message);
+                this.txtLog.Text = tmpUILog;
+                tmpUILog = "";
             }
+            this.txtLog.AppendText(text);
+            this.txtLog.Select(0, 0);
+            this.txtLog.ScrollToCaret();
         }
 
-        private void HandleClientComm(object client)
+        public delegate void updateLog();
+
+        public void AcceptCallback(IAsyncResult ar)
         {
-            TcpClient tcpClient = (TcpClient)client;
-            NetworkStream clientStream = tcpClient.GetStream();
-
-            byte[] message = new byte[4096];
-            int bytesRead;
-
+            bool flag;
+            Socket asyncSocket = ((Socket)ar.AsyncState).EndAccept(ar);
+            if ((asyncSocket == null) || !asyncSocket.Connected)
+            {
+                return;
+            }
+            asyncSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 1000);
+            asyncSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, 1000);
+            asyncSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveBuffer, 512);
+            string str = "";
+            string responseData = "";
+            string str3 = "";
             while (true)
             {
-                bytesRead = 0;
-
+                outputLog = new string[5];
+                flag = false;
+                int count = 0;
+                str3 = "";
+                byte[] bytes = new byte[512];
                 try
                 {
-                    //blocks until a client sends a message
-                    bytesRead = clientStream.Read(message, 0, 4096);
+                    count = asyncSocket.Receive(bytes);
                 }
-                catch (Exception ex)
+                catch (SocketException exception)
                 {
-                    //a socket error has occured
-                    log.Error("Fail to HandleClientComm. Error: " + ex.Message);
-                    break;
+                    if ((exception.ErrorCode == 10060) || (exception.ErrorCode == 10035))
+                    {
+                        continue;
+                    }
+                    this.Listen();
+                    return;
                 }
-
-                if (bytesRead == 0)
+                if (count <= 0)
                 {
-                    //the client has disconnected from the server
-                    break;
+                    if (true)
+                    {
+                        this.Listen();
+                        return;
+                    }
                 }
-
-                //message has successfully been received
-                UnicodeEncoding encoder = new UnicodeEncoding();
-                string recvData = encoder.GetString(message, 0, bytesRead);
-
-                ModifyTextBox("Input: " + recvData);
-                log.Info("Input: " + recvData);
-                if (isConnect)
+                else
                 {
-                    recvData = convertData(recvData, _offset_default_y);
-                    sendData(recvData);
+                    string str4 = Encoding.Unicode.GetString(bytes, 0, count);
+                    if (str.Length > 0)
+                    {
+                        str4 = str + str4;
+                        str = "";
+                    }
+                    if (str4.Length > 0)
+                    {
+                        int num2 = str4.LastIndexOf("\r");
+                        if (num2 == -1)
+                        {
+                            str = str4;
+                            str4 = "";
+                        }
+                        else if (num2 < (str4.Length - 1))
+                        {
+                            str = str4.Substring(num2 + 1);
+                            str4 = str4.Remove(num2 + 1, (str4.Length - num2) - 1);
+                        }
+                        foreach (string str7 in str4.Split(new char[] { '\r' }))
+                        {
+                            if (str7.Length >= 1)
+                            {
+                                receiveData.Add(str7);
+                            }
+                        }
+                    }
+                    while (receiveData.Count > 0)
+                    {
+                        string str8 = (string)receiveData[0];
+                        receiveData.RemoveAt(0);
+                        str3 = String.Format("Receive: {0}\r\n", str8);
+                        outputLog[0] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                        outputLog[1] = str8;
+                        outputLog[4] = "N";
+                        if (str8.CompareTo("GetStatus") == 0)
+                        {
+                            responseData = "Device_OK\r";
+                            flag = true;
+                        }
+                        else if (str8.CompareTo("Rdy4_Xmit?") == 0)
+                        {
+                            responseData = "Send_All\r";
+                            clearLog = true;
+                            flag = true;
+                            needCreateNewLog = true;
+                        }
+                        if (flag)
+                        {
+                            bytes = Encoding.Unicode.GetBytes(responseData);
+                            int responseDataLength = 0;
+                            try
+                            {
+                                responseDataLength = asyncSocket.Send(bytes);
+                            }
+                            catch (SocketException exception2)
+                            {
+                                if ((exception2.ErrorCode == 10060) || (exception2.ErrorCode == 10035))
+                                {
+                                    continue;
+                                }
+                                this.Listen();
+                                break;
+                            }
+                            if (responseDataLength > 0)
+                            {
+                                str3 = String.Format("Response: {0}\r\n", responseData.Substring(0, responseData.Length - 1));
+                            }
+                        }
+                        lock (memLock)
+                        {
+                            tmpUILog = str3;
+                        }
+                        updateLog method = new updateLog(this.updateLogText);
+                        this.txtLog.Invoke(method);
+
+                        string convertedData = convertData(str8, _offset_default_y);
+                        if (isConnect && flag != true)
+                        {
+                            sendData(convertedData);
+                        }
+                        if (createNewLogFirst && jobID != "")
+                        {
+                            setLogFile();
+                            XmlConfigurator.Configure(new FileInfo("log4netconfig.xml"));
+                            createNewLogFirst = false;
+                        }
+                        else if (needCreateNewLog && createNewLogFirst == false)
+                        {
+                            createNewLogFile();
+                            needCreateNewLog = false;
+                        }
+                        log.Info(String.Format("{0};{1};{2};{3};{4}", outputLog[0], outputLog[1], outputLog[2], outputLog[3], outputLog[4]));
+                    }
                 }
             }
-
-            tcpClient.Close();
         }
 
-        public delegate void ModifyTextBoxDelegate(String s);
-        private void ModifyTextBox(String s)
+        public void Listen()
         {
-            if (txtLog.InvokeRequired)
+            this.Shutdown();
+            if (responseSocket == null)
             {
-                ModifyTextBoxDelegate d = new ModifyTextBoxDelegate(ModifyTextBox);
-                this.Invoke(d, s);
+                try
+                {
+                    IPAddress address = IPAddress.Parse(txtSourceIP.Text);
+                    int port = Convert.ToInt32(txtSourcePort.Text);
+                    IPEndPoint localEP = new IPEndPoint(address, port);
+                    responseSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    LingerOption optionValue = new LingerOption(false, 0);
+                    responseSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, optionValue);
+                    responseSocket.Bind(localEP);
+                    responseSocket.Listen(1);
+                    responseSocket.BeginAccept(new AsyncCallback(this.AcceptCallback), responseSocket);
+                }
+                catch (Exception exception)
+                {
+                    MessageBox.Show(exception.Message);
+                }
             }
-            else
-            {
-                txtLog.Text = txtLog.Text + s + Environment.NewLine;
-            }
-            return;
         }
 
-        private void sendResponse()
-        { 
+        private void Shutdown()
+        {
+            if (responseSocket != null)
+            {
+                try
+                {
+                    responseSocket.Shutdown(SocketShutdown.Both);
+                }
+                catch (Exception)
+                {
+                }
+                try
+                {
+                    responseSocket.Close();
+                }
+                catch (Exception)
+                {
+                }
+                responseSocket = null;
+            }
         }
+
+        private bool TestConnection()
+        {
+            return false;
+        }
+
         private void sendData(string output)
         {
             try
@@ -417,23 +528,52 @@ namespace CCDConvert
                 outputStream = outputClient.GetStream();
 
                 UnicodeEncoding encoder = new UnicodeEncoding();
-                byte[] buffer = encoder.GetBytes(output + "\r");
-                ModifyTextBox("Output: " + output);
-                log.Info("Output: " + output);
+                byte[] buffer = encoder.GetBytes(String.Format("{0}\r",output));
 
                 outputStream.Write(buffer, 0, buffer.Length);
                 outputStream.Flush();
+                outputLog[2] = output;
+                outputLog[3] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                outputLog[4] = "Y";
                 tslbSoftware.Text = "Software OK";
                 tslbSoftware.Image = Properties.Resources.Run;
+                tmpUILog = String.Format("Output: {0}\r\n", output);
+                updateLog method = new updateLog(this.updateLogText);
+                this.txtLog.Invoke(method);
             }
             catch (NetworkInformationException ex)
             {
                 tslbSoftware.Text = "Software Error";
                 tslbSoftware.Image = Properties.Resources.Stop;
-                log.Error("Fail to send data. Error: " + ex.Message);
+                outputLog[2] = "Software Error";
+                outputLog[4] = "N";
             }
         }
-        
+
+        private void setLogFile()
+        {
+            string logName = String.Format("JobId_{0}.csv", System.DateTime.Now.ToString("yyyyMMddHHmmss"));
+            log4net.GlobalContext.Properties["LogName"] = logName;
+        }
+
+        public static bool createNewLogFile()
+        {
+            string logName = String.Format("JobId_{0}.csv", System.DateTime.Now.ToString("yyyyMMddHHmmss"));
+
+            var rootRepository = log4net.LogManager.GetRepository();
+            foreach (var appender in rootRepository.GetAppenders())
+            {
+                if (appender.Name.Equals("fileAppender") && appender is log4net.Appender.FileAppender)
+                {
+                    var fileAppender = appender as log4net.Appender.FileAppender;
+                    fileAppender.File = logName;
+                    fileAppender.ActivateOptions();
+                    return true;  // Appender found and name changed to NewFilename
+                }
+            }
+            return false; // appender not found
+        }
+
         #endregion
 
         #region Event
@@ -475,7 +615,6 @@ namespace CCDConvert
             if (drResult == DialogResult.Yes)
             {
                 saveXml(xmlPath, dgvRelativeSettings);
-                log.Info("Application Close");
             }
             else if (drResult == DialogResult.No)
             {
@@ -484,10 +623,5 @@ namespace CCDConvert
 
         }
         #endregion
-
-       
-
-
-
     }
 }

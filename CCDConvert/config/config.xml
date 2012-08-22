@@ -2,15 +2,15 @@
 <config>
   <relative_table>
     <column>
-      <source>SC</source>
+      <source>SW</source>
       <target>1</target>
     </column>
     <column>
-      <source>DS,WS</source>
+      <source>WS,DS</source>
       <target>2</target>
     </column>
   </relative_table>
-  <offset name="Y">0.838383</offset>
+  <offset name="Y">0.821001</offset>
   <offset name="X">0.121001</offset>
   <offset name="DefaultOffsetY">1000</offset>
 </config>

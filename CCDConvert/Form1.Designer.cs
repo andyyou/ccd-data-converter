@@ -37,7 +37,6 @@
             this.lb2 = new System.Windows.Forms.Label();
             this.txtDestPort = new System.Windows.Forms.TextBox();
             this.stInfo = new System.Windows.Forms.StatusStrip();
-            this.tslbStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.tslbHardware = new System.Windows.Forms.ToolStripStatusLabel();
             this.tslbSoftware = new System.Windows.Forms.ToolStripStatusLabel();
             this.btnStart = new System.Windows.Forms.Button();
@@ -135,7 +134,6 @@
             // stInfo
             // 
             this.stInfo.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tslbStatus,
             this.tslbHardware,
             this.tslbSoftware});
             this.stInfo.Location = new System.Drawing.Point(0, 543);
@@ -143,12 +141,6 @@
             this.stInfo.Size = new System.Drawing.Size(867, 22);
             this.stInfo.TabIndex = 8;
             this.stInfo.Text = "statusStrip1";
-            // 
-            // tslbStatus
-            // 
-            this.tslbStatus.Name = "tslbStatus";
-            this.tslbStatus.Size = new System.Drawing.Size(113, 17);
-            this.tslbStatus.Text = "Status : Connected";
             // 
             // tslbHardware
             // 
@@ -343,7 +335,6 @@
         private System.Windows.Forms.Label lb2;
         private System.Windows.Forms.TextBox txtDestPort;
         private System.Windows.Forms.StatusStrip stInfo;
-        private System.Windows.Forms.ToolStripStatusLabel tslbStatus;
         private System.Windows.Forms.ToolStripStatusLabel tslbHardware;
         private System.Windows.Forms.ToolStripStatusLabel tslbSoftware;
         private System.Windows.Forms.Button btnStart;
