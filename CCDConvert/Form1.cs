@@ -31,6 +31,8 @@ namespace CCDConvert
         private string jobID = "";
         private string[] outputLog = new string[5];
         private static string xmlPath = @"C:\Workspace\GitHub\ccd_data_converter\CCDConvert\config\config.xml";
+        private Image imgRun = Properties.Resources.Run;
+        private Image imgStop = Properties.Resources.Stop;
 
         private double _offset_default_y, offset_y, offset_x;
         private Dictionary<string, string> dicRelative = new Dictionary<string, string>();
@@ -57,9 +59,9 @@ namespace CCDConvert
         private void FormMain_Load(object sender, EventArgs e)
         {
             // Initial status image
-            tslbHardware.Image = Properties.Resources.Stop;
+            tslbHardware.Image = imgStop;
             tslbSoftware.Text = "Software Idle";
-            tslbSoftware.Image = Properties.Resources.Run;
+            tslbSoftware.Image = imgRun;
 
             // Load log4net config file
             //XmlConfigurator.Configure(new FileInfo("log4netconfig.xml"));
@@ -72,6 +74,24 @@ namespace CCDConvert
 
             // ** Notice : Before use [converData] need run again. 本來要將Relative的資料綁入converData 但效能差了2倍 
             updateDictionaryRelative();
+
+            //jobID = "Test";
+            //setLogFile();
+            //XmlConfigurator.Configure(new FileInfo("log4netconfig.xml"));
+            ////string tstData = "DATA,FlawID,0;FlawName,WS;FlawMD,0.104000;FlawCD,0.524000;JobID,tst-1;\rDATA,FlawID,1;FlawName,DS;FlawMD,0.204000;FlawCD,0.624000;JobID,tst-1;\rDATA,FlawID,2;FlawName,SW;FlawMD,0.304000;FlawCD,0.724000;JobID,tst-1;\rDATA,FlawID,3;FlawName,WS;FlawMD,0.404000;FlawCD,0.824000;JobID,tst-1;\r";
+            //string tstData = "DATA,FlawID,0;FlawName,WS;FlawMD,0.104000;FlawCD,0.524000;JobID,tst-1;\r";
+            //string outData = convertData(tstData, 0);
+            //string[] splitReceiveData = tstData.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            //string[] splitConvertedData = outData.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            //outputLog[0] = System.DateTime.Now.ToString("yyyyMMddhhmmssfff");
+            //outputLog[3] = System.DateTime.Now.ToString("yyyyMMddhhmmssfff");
+            //outputLog[4] = "N";
+            //for (int i = 0; i < splitReceiveData.Length; i++)
+            //{
+            //    outputLog[1] = splitReceiveData[i];
+            //    outputLog[2] = splitConvertedData[i];
+            //    writeLog();
+            //}
         }
 
         private void btnStart_Click(object sender, EventArgs e)
@@ -92,23 +112,36 @@ namespace CCDConvert
                     btnStop.Text = "Stop(&S)";
                     isConnect = true;
                     tslbSoftware.Text = "Software Listening-Sending";
-                    tslbSoftware.Image = Properties.Resources.Run;
+                    tslbSoftware.Image = imgRun;
                 }
                 catch (SocketException)
                 {
                     outputLog[0] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
                     outputLog[1] = "Software Error";
+                    outputLog[4] = "N";
+                    writeLog();
                     return;
                 }
             }
             else
             {
-                outputStream.Close();
-                outputClient.Close();
-                btnStop.Text = "Send(&S)";
-                isConnect = false;
-                tslbSoftware.Text = "Software Listening";
-                tslbSoftware.Image = Properties.Resources.Stop;
+                try
+                {
+                    outputStream.Close();
+                    outputClient.Close();
+                    btnStop.Text = "Send(&S)";
+                    isConnect = false;
+                    tslbSoftware.Text = "Software Listening";
+                    tslbSoftware.Image = imgStop;
+                }
+                catch (NetworkInformationException)
+                {
+                    outputLog[0] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                    outputLog[1] = "Software Error";
+                    outputLog[4] = "N";
+                    writeLog();
+                    return;
+                }
             }
         }
 
@@ -116,8 +149,6 @@ namespace CCDConvert
 
         private void updateNetworkStatus()
         {
-            Image imgRun = Properties.Resources.Run;
-            Image imgStop = Properties.Resources.Stop;
             while (true)
             {
                 if (isNetworkConnected())
@@ -204,42 +235,48 @@ namespace CCDConvert
             Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
             Dictionary<string, string> dicOutpout = new Dictionary<string, string>();
             string result = "";
-            if (regex.IsMatch(input))
-            {
-                string[] tmp = input.Substring(input.IndexOf(',') + 1).Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] inputArray = input.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
-                foreach (string i in tmp)
+            foreach (string inputData in inputArray)
+            {
+                dicOutpout.Clear();
+                if (regex.IsMatch(inputData))
                 {
-                    if (i.IndexOf(',') > 0)
+                    string[] tmp = inputData.Substring(inputData.IndexOf(',') + 1).Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (string i in tmp)
                     {
-                        string[] sp = i.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                        if ((i.IndexOf(',') > 0) && (!dicOutpout.ContainsKey(sp[0].ToString())))
+                        if (i.IndexOf(',') > 0)
                         {
-                            dicOutpout.Add(sp[0].ToString(), sp[1].ToString());
+                            string[] sp = i.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                            if ((i.IndexOf(',') > 0) && (!dicOutpout.ContainsKey(sp[0].ToString())))
+                            {
+                                dicOutpout.Add(sp[0].ToString(), sp[1].ToString());
+                            }
                         }
                     }
+
+                    // Deal format string
+                    //double offset_y = double.TryParse(txtY.Text, out offset_y) ? offset_y : 0;
+                    //double offset_x = double.TryParse(txtX.Text, out offset_x) ? offset_x : 0;
+                    if ((jobID != dicOutpout["JobID"]) && (createNewLogFirst == false))
+                    {
+                        needCreateNewLog = true;
+                    }
+                    jobID = dicOutpout["JobID"];
+
+                    double y = double.Parse(dicOutpout["FlawMD"]) * 1000 + _offset_default_y + offset_y;
+                    double x = double.Parse(dicOutpout["FlawCD"]) * 1000 + offset_x;
+
+                    if (dicRelative.ContainsKey(dicOutpout["FlawName"]))
+                        result = result + String.Format("{0};{1};{2}", dicRelative[dicOutpout["FlawName"]], y.ToString(), x.ToString()) + "\r";
+                    else
+                        result = result + String.Format("{0};{1};{2}", "0", y.ToString(), x.ToString()) + "\r";
                 }
-
-                // Deal format string
-                //double offset_y = double.TryParse(txtY.Text, out offset_y) ? offset_y : 0;
-                //double offset_x = double.TryParse(txtX.Text, out offset_x) ? offset_x : 0;
-                if ((jobID != dicOutpout["JobID"]) && (createNewLogFirst == false))
-                {
-                    needCreateNewLog = true;
-                }
-                jobID = dicOutpout["JobID"];
-
-                double y = double.Parse(dicOutpout["FlawMD"]) * 1000 + _offset_default_y + offset_y;
-                double x = double.Parse(dicOutpout["FlawCD"]) * 1000 + offset_x;
-
-                if (dicRelative.ContainsKey(dicOutpout["FlawName"]))
-                    result = String.Format("{0};{1};{2}", dicRelative[dicOutpout["FlawName"]], y.ToString(), x.ToString());
                 else
-                    result = String.Format("{0};{1};{2}", "0", y.ToString(), x.ToString());
-            }
-            else
-            {
-                result = input;
+                {
+                    result += inputData;
+                }
             }
 
             return result;
@@ -351,6 +388,12 @@ namespace CCDConvert
             string str3 = "";
             while (true)
             {
+                if (asyncSocket.Connected)
+                {
+                    tslbSoftware.Text = "Software Listening";
+                    tslbSoftware.Image = imgRun;
+                }
+                
                 outputLog = new string[5];
                 flag = false;
                 int count = 0;
@@ -365,6 +408,11 @@ namespace CCDConvert
                     if ((exception.ErrorCode == 10060) || (exception.ErrorCode == 10035))
                     {
                         continue;
+                    }
+                    else
+                    {
+                        tslbSoftware.Text = "Software Error";
+                        tslbSoftware.Image = imgStop;
                     }
                     this.Listen();
                     return;
@@ -475,7 +523,15 @@ namespace CCDConvert
                         {
                             sendData(convertedData);
                         }
-                        log.Info(String.Format("{0};{1};{2};{3};{4}", outputLog[0], outputLog[1], outputLog[2], outputLog[3], outputLog[4]));
+
+                        string[] splitReceiveData = str8.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] splitConvertedData = convertedData.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                        for (int i = 0; i < splitReceiveData.Length;i++)
+                        {
+                            outputLog[1] = splitReceiveData[i];
+                            outputLog[2] = splitConvertedData[i];
+                            writeLog();
+                        }
                     }
                 }
             }
@@ -501,6 +557,7 @@ namespace CCDConvert
                 catch (Exception exception)
                 {
                     MessageBox.Show(exception.Message);
+                    btnStart.Enabled = true;
                 }
             }
         }
@@ -542,13 +599,13 @@ namespace CCDConvert
                 outputStream = outputClient.GetStream();
 
                 UnicodeEncoding encoder = new UnicodeEncoding();
-                byte[] buffer = encoder.GetBytes(String.Format("{0}\r",output));
+                byte[] buffer = encoder.GetBytes(String.Format("{0}",output));
 
                 outputStream.Write(buffer, 0, buffer.Length);
                 outputStream.Flush();
                 outputLog[4] = "Y";
                 tslbSoftware.Text = "Software OK";
-                tslbSoftware.Image = Properties.Resources.Run;
+                tslbSoftware.Image = imgRun;
                 tmpUILog = String.Format("Output: {0}\r\n", output);
                 updateLog method = new updateLog(this.updateLogText);
                 this.txtLog.Invoke(method);
@@ -556,7 +613,7 @@ namespace CCDConvert
             catch (NetworkInformationException)
             {
                 tslbSoftware.Text = "Software Error";
-                tslbSoftware.Image = Properties.Resources.Stop;
+                tslbSoftware.Image = imgStop;
                 outputLog[2] = "Software Error";
             }
         }
@@ -583,6 +640,11 @@ namespace CCDConvert
                 }
             }
             return false; // appender not found
+        }
+
+        private void writeLog()
+        {
+            log.Info(String.Format("{0};{1};{2};{3};{4}", outputLog[0], outputLog[1], outputLog[2], outputLog[3], outputLog[4]));
         }
 
         #endregion
