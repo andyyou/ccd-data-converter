@@ -9,10 +9,6 @@
       <source>WS,DS</source>
       <target>2</target>
     </column>
-    <column>
-      <source>TS</source>
-      <target>4</target>
-    </column>
   </relative_table>
   <offset name="Y">0.821001</offset>
   <offset name="X">0.121001</offset>
