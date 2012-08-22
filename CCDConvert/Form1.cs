@@ -223,7 +223,12 @@ namespace CCDConvert
                 // Deal format string
                 //double offset_y = double.TryParse(txtY.Text, out offset_y) ? offset_y : 0;
                 //double offset_x = double.TryParse(txtX.Text, out offset_x) ? offset_x : 0;
+                if ((jobID != dicOutpout["JobID"]) && (createNewLogFirst == false))
+                {
+                    needCreateNewLog = true;
+                }
                 jobID = dicOutpout["JobID"];
+
                 double y = double.Parse(dicOutpout["FlawMD"]) * 1000 + _offset_default_y + offset_y;
                 double x = double.Parse(dicOutpout["FlawCD"]) * 1000 + offset_x;
 
@@ -294,16 +299,18 @@ namespace CCDConvert
                 navigator.DeleteRange(last);
             }
 
-            dgv.EndEdit();
-            for (int i = 0; i < dgv.Rows.Count - 1; i++)
+            lock (dgv)
             {
-                string source = dgv.Rows[i].Cells[0].Value.ToString();
-                string target = dgv.Rows[i].Cells[1].Value.ToString();
-                navigator.SelectSingleNode("//relative_table").AppendChildElement(string.Empty, "column", string.Empty, null);
-                // Move to last column element and add source , target value.
-                navigator.SelectSingleNode("//relative_table/column[last()]").AppendChildElement(string.Empty, "source", string.Empty, source.ToUpper());
-                navigator.SelectSingleNode("//relative_table/column[last()]").AppendChildElement(string.Empty, "target", string.Empty, target.ToUpper());
-               
+                for (int i = 0; i < dgv.Rows.Count - 1; i++)
+                {
+                    string source = dgv.Rows[i].Cells[0].Value.ToString();
+                    string target = dgv.Rows[i].Cells[1].Value.ToString();
+                    navigator.SelectSingleNode("//relative_table").AppendChildElement(string.Empty, "column", string.Empty, null);
+                    // Move to last column element and add source , target value.
+                    navigator.SelectSingleNode("//relative_table/column[last()]").AppendChildElement(string.Empty, "source", string.Empty, source.ToUpper());
+                    navigator.SelectSingleNode("//relative_table/column[last()]").AppendChildElement(string.Empty, "target", string.Empty, target.ToUpper());
+
+                }
             }
             document.Save(path); 
         }
@@ -417,7 +424,6 @@ namespace CCDConvert
                             responseData = "Send_All\r";
                             clearLog = true;
                             flag = true;
-                            needCreateNewLog = true;
                         }
                         if (flag)
                         {
@@ -448,12 +454,13 @@ namespace CCDConvert
                         updateLog method = new updateLog(this.updateLogText);
                         this.txtLog.Invoke(method);
 
-                        string convertedData = convertData(str8, _offset_default_y);
-                        if (isConnect && flag != true)
+                        if (flag)
                         {
-                            sendData(convertedData);
+                            continue;
                         }
-                        if (createNewLogFirst && jobID != "")
+
+                        string convertedData = convertData(str8, _offset_default_y);
+                        if (createNewLogFirst)
                         {
                             setLogFile();
                             XmlConfigurator.Configure(new FileInfo("log4netconfig.xml"));
@@ -463,6 +470,10 @@ namespace CCDConvert
                         {
                             createNewLogFile();
                             needCreateNewLog = false;
+                        }
+                        if (isConnect && flag != true)
+                        {
+                            sendData(convertedData);
                         }
                         log.Info(String.Format("{0};{1};{2};{3};{4}", outputLog[0], outputLog[1], outputLog[2], outputLog[3], outputLog[4]));
                     }
@@ -525,6 +536,9 @@ namespace CCDConvert
         {
             try
             {
+                outputLog[2] = output;
+                outputLog[3] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
+
                 outputStream = outputClient.GetStream();
 
                 UnicodeEncoding encoder = new UnicodeEncoding();
@@ -532,8 +546,6 @@ namespace CCDConvert
 
                 outputStream.Write(buffer, 0, buffer.Length);
                 outputStream.Flush();
-                outputLog[2] = output;
-                outputLog[3] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
                 outputLog[4] = "Y";
                 tslbSoftware.Text = "Software OK";
                 tslbSoftware.Image = Properties.Resources.Run;
@@ -541,24 +553,23 @@ namespace CCDConvert
                 updateLog method = new updateLog(this.updateLogText);
                 this.txtLog.Invoke(method);
             }
-            catch (NetworkInformationException ex)
+            catch (NetworkInformationException)
             {
                 tslbSoftware.Text = "Software Error";
                 tslbSoftware.Image = Properties.Resources.Stop;
                 outputLog[2] = "Software Error";
-                outputLog[4] = "N";
             }
         }
 
         private void setLogFile()
         {
-            string logName = String.Format("JobId_{0}.csv", System.DateTime.Now.ToString("yyyyMMddHHmmss"));
+            string logName = String.Format("{0}_{1}.csv", jobID, System.DateTime.Now.ToString("yyyyMMddHHmmss"));
             log4net.GlobalContext.Properties["LogName"] = logName;
         }
 
-        public static bool createNewLogFile()
+        public bool createNewLogFile()
         {
-            string logName = String.Format("JobId_{0}.csv", System.DateTime.Now.ToString("yyyyMMddHHmmss"));
+            string logName = String.Format("{0}_{1}.csv", jobID, System.DateTime.Now.ToString("yyyyMMddHHmmss"));
 
             var rootRepository = log4net.LogManager.GetRepository();
             foreach (var appender in rootRepository.GetAppenders())
