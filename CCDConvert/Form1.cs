@@ -26,11 +26,17 @@ namespace CCDConvert
         #region Local variables
 
         private static ILog log = LogManager.GetLogger(typeof(Program));
+        // 判斷是否為第一次建立 Log 檔
         private bool createNewLogFirst = true;
+        // 判斷是否需要建立新 Log 檔(換新工單時須建立新檔)
         private bool needCreateNewLog = false;
+        // 存放工單名稱(建立 Log 檔時使用)
         private string jobID = "";
+        // 存放待輸出的 Log 資料
         private string[] outputLog = new string[5];
-        private static string xmlPath = @"C:\Workspace\GitHub\ccd_data_converter\CCDConvert\config\config.xml";
+        // 設定檔路徑
+        private static string xmlPath = @"config\config.xml";
+        // 存放狀態列所使用的圖片
         private Image imgRun = Properties.Resources.Run;
         private Image imgStop = Properties.Resources.Stop;
 
@@ -62,6 +68,7 @@ namespace CCDConvert
             tslbHardware.Image = imgStop;
             tslbSoftware.Text = "Software Idle";
             tslbSoftware.Image = imgRun;
+            btnStop.Enabled = false;
 
             // Load log4net config file
             //XmlConfigurator.Configure(new FileInfo("log4netconfig.xml"));
@@ -74,29 +81,12 @@ namespace CCDConvert
 
             // ** Notice : Before use [converData] need run again. 本來要將Relative的資料綁入converData 但效能差了2倍 
             updateDictionaryRelative();
-
-            //jobID = "Test";
-            //setLogFile();
-            //XmlConfigurator.Configure(new FileInfo("log4netconfig.xml"));
-            ////string tstData = "DATA,FlawID,0;FlawName,WS;FlawMD,0.104000;FlawCD,0.524000;JobID,tst-1;\rDATA,FlawID,1;FlawName,DS;FlawMD,0.204000;FlawCD,0.624000;JobID,tst-1;\rDATA,FlawID,2;FlawName,SW;FlawMD,0.304000;FlawCD,0.724000;JobID,tst-1;\rDATA,FlawID,3;FlawName,WS;FlawMD,0.404000;FlawCD,0.824000;JobID,tst-1;\r";
-            //string tstData = "DATA,FlawID,0;FlawName,WS;FlawMD,0.104000;FlawCD,0.524000;JobID,tst-1;\r";
-            //string outData = convertData(tstData, 0);
-            //string[] splitReceiveData = tstData.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
-            //string[] splitConvertedData = outData.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
-            //outputLog[0] = System.DateTime.Now.ToString("yyyyMMddhhmmssfff");
-            //outputLog[3] = System.DateTime.Now.ToString("yyyyMMddhhmmssfff");
-            //outputLog[4] = "N";
-            //for (int i = 0; i < splitReceiveData.Length; i++)
-            //{
-            //    outputLog[1] = splitReceiveData[i];
-            //    outputLog[2] = splitConvertedData[i];
-            //    writeLog();
-            //}
         }
 
         private void btnStart_Click(object sender, EventArgs e)
         {
             btnStart.Enabled = false;
+            btnStop.Enabled = true;
             tslbSoftware.Text = "Software Listening";
             this.Listen();
         }
@@ -114,12 +104,19 @@ namespace CCDConvert
                     tslbSoftware.Text = "Software Listening-Sending";
                     tslbSoftware.Image = imgRun;
                 }
-                catch (SocketException)
+                catch (SocketException ex)
                 {
-                    outputLog[0] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                    outputLog[1] = "Software Error";
-                    outputLog[4] = "N";
-                    writeLog();
+                    if (jobID != "")
+                    {
+                        outputLog[0] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                        outputLog[1] = "Software Error";
+                        outputLog[4] = "N";
+                        writeLog();
+                    }
+                    else
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
                     return;
                 }
             }
@@ -160,12 +157,19 @@ namespace CCDConvert
                 {
                     tslbHardware.Text = "Hardware Error";
                     tslbHardware.Image = imgStop;
+                    if (jobID != "")
+                    {
+                        outputLog[0] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                        outputLog[1] = "Hardware Error";
+                        outputLog[4] = "N";
+                        writeLog();
+                    }
                 }
             }
 
         }
 
-        //將DataGridView的對資料轉存成Dictionary提升效能
+        // 將DataGridView的成對資料轉存成Dictionary提升效能
         private Dictionary<string, string> getRelativeGridViewToDictionary(DataGridView dgv)
         {
             Dictionary<string, string> tmpDict = new Dictionary<string, string>();
@@ -271,7 +275,8 @@ namespace CCDConvert
                     if (dicRelative.ContainsKey(dicOutpout["FlawName"]))
                         result = result + String.Format("{0};{1};{2}", dicRelative[dicOutpout["FlawName"]], y.ToString(), x.ToString()) + "\r";
                     else
-                        result = result + String.Format("{0};{1};{2}", "0", y.ToString(), x.ToString()) + "\r";
+                        // 2012/08/23: 若找不到符合的轉換資料，預設之輸出資料第一個欄位設為1
+                        result = result + String.Format("{0};{1};{2}", "1", y.ToString(), x.ToString()) + "\r";
                 }
                 else
                 {
@@ -409,10 +414,14 @@ namespace CCDConvert
                     {
                         continue;
                     }
-                    else
+                    else // 判斷 Client 是否斷線
                     {
                         tslbSoftware.Text = "Software Error";
                         tslbSoftware.Image = imgStop;
+                        outputLog[0] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                        outputLog[1] = "Software Error";
+                        outputLog[4] = "N";
+                        writeLog();
                     }
                     this.Listen();
                     return;
@@ -558,6 +567,7 @@ namespace CCDConvert
                 {
                     MessageBox.Show(exception.Message);
                     btnStart.Enabled = true;
+                    btnStop.Enabled = false;
                 }
             }
         }
@@ -604,7 +614,7 @@ namespace CCDConvert
                 outputStream.Write(buffer, 0, buffer.Length);
                 outputStream.Flush();
                 outputLog[4] = "Y";
-                tslbSoftware.Text = "Software OK";
+                tslbSoftware.Text = "Software Listening-Sending";
                 tslbSoftware.Image = imgRun;
                 tmpUILog = String.Format("Output: {0}\r\n", output);
                 updateLog method = new updateLog(this.updateLogText);
@@ -620,13 +630,13 @@ namespace CCDConvert
 
         private void setLogFile()
         {
-            string logName = String.Format("{0}_{1}.csv", jobID, System.DateTime.Now.ToString("yyyyMMddHHmmss"));
+            string logName = String.Format(@"{0}_{1}.csv", jobID, System.DateTime.Now.ToString("yyyyMMddHHmmss"));
             log4net.GlobalContext.Properties["LogName"] = logName;
         }
 
         public bool createNewLogFile()
         {
-            string logName = String.Format("{0}_{1}.csv", jobID, System.DateTime.Now.ToString("yyyyMMddHHmmss"));
+            string logName = String.Format(@"log\{0}_{1}.csv", jobID, System.DateTime.Now.ToString("yyyyMMddHHmmss"));
 
             var rootRepository = log4net.LogManager.GetRepository();
             foreach (var appender in rootRepository.GetAppenders())
@@ -644,7 +654,7 @@ namespace CCDConvert
 
         private void writeLog()
         {
-            log.Info(String.Format("{0};{1};{2};{3};{4}", outputLog[0], outputLog[1], outputLog[2], outputLog[3], outputLog[4]));
+            log.Info(String.Format(@"{0};{1};{2};{3};{4}", outputLog[0], outputLog[1], outputLog[2], outputLog[3], outputLog[4]));
         }
 
         #endregion
@@ -676,7 +686,7 @@ namespace CCDConvert
         {
             TextBox txt = (TextBox)sender;
             int port = int.TryParse(txt.Text, out port) ? port : 0;
-            if (port < 0 && port > 65536)
+            if (port < 1 || port > 65535)
             {
                 txt.Text = "";
             }
