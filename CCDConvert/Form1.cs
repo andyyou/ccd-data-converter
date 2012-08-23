@@ -142,6 +142,13 @@ namespace CCDConvert
                 {
                     tslbHardware.Text = "Hardware Error";
                     tslbHardware.Image = imgStop;
+                    if (jobID != "")
+                    {
+                        outputLog[0] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                        outputLog[1] = "Hardware Error";
+                        outputLog[4] = "N";
+                        writeLog();
+                    }
                 }
             }
 
@@ -253,7 +260,8 @@ namespace CCDConvert
                     if (dicRelative.ContainsKey(dicOutpout["FlawName"]))
                         result = result + String.Format("{0};{1};{2}", dicRelative[dicOutpout["FlawName"]], y.ToString(), x.ToString()) + "\r";
                     else
-                        result = result + String.Format("{0};{1};{2}", "0", y.ToString(), x.ToString()) + "\r";
+                        // 2012/08/23: 若找不到符合的轉換資料，預設之輸出資料第一個欄位設為1
+                        result = result + String.Format("{0};{1};{2}", "1", y.ToString(), x.ToString()) + "\r";
                 }
                 else
                 {
@@ -586,7 +594,7 @@ namespace CCDConvert
                 outputStream.Write(buffer, 0, buffer.Length);
                 outputStream.Flush();
                 outputLog[4] = "Y";
-                tslbSoftware.Text = "Software OK";
+                tslbSoftware.Text = "Software Listening-Sending";
                 tslbSoftware.Image = imgRun;
                 tmpUILog = String.Format("Output: {0}\r\n", output);
                 updateLog method = new updateLog(this.updateLogText);
