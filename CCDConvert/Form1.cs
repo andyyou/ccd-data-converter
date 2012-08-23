@@ -30,7 +30,7 @@ namespace CCDConvert
         private bool needCreateNewLog = false;
         private string jobID = "";
         private string[] outputLog = new string[5];
-        private static string xmlPath = @"C:\Workspace\GitHub\ccd_data_converter\CCDConvert\config\config.xml";
+        private static string xmlPath = @"config\config.xml";
         private Image imgRun = Properties.Resources.Run;
         private Image imgStop = Properties.Resources.Stop;
 
@@ -74,24 +74,6 @@ namespace CCDConvert
 
             // ** Notice : Before use [converData] need run again. 本來要將Relative的資料綁入converData 但效能差了2倍 
             updateDictionaryRelative();
-
-            //jobID = "Test";
-            //setLogFile();
-            //XmlConfigurator.Configure(new FileInfo("log4netconfig.xml"));
-            ////string tstData = "DATA,FlawID,0;FlawName,WS;FlawMD,0.104000;FlawCD,0.524000;JobID,tst-1;\rDATA,FlawID,1;FlawName,DS;FlawMD,0.204000;FlawCD,0.624000;JobID,tst-1;\rDATA,FlawID,2;FlawName,SW;FlawMD,0.304000;FlawCD,0.724000;JobID,tst-1;\rDATA,FlawID,3;FlawName,WS;FlawMD,0.404000;FlawCD,0.824000;JobID,tst-1;\r";
-            //string tstData = "DATA,FlawID,0;FlawName,WS;FlawMD,0.104000;FlawCD,0.524000;JobID,tst-1;\r";
-            //string outData = convertData(tstData, 0);
-            //string[] splitReceiveData = tstData.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
-            //string[] splitConvertedData = outData.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
-            //outputLog[0] = System.DateTime.Now.ToString("yyyyMMddhhmmssfff");
-            //outputLog[3] = System.DateTime.Now.ToString("yyyyMMddhhmmssfff");
-            //outputLog[4] = "N";
-            //for (int i = 0; i < splitReceiveData.Length; i++)
-            //{
-            //    outputLog[1] = splitReceiveData[i];
-            //    outputLog[2] = splitConvertedData[i];
-            //    writeLog();
-            //}
         }
 
         private void btnStart_Click(object sender, EventArgs e)
@@ -626,7 +608,7 @@ namespace CCDConvert
 
         public bool createNewLogFile()
         {
-            string logName = String.Format("{0}_{1}.csv", jobID, System.DateTime.Now.ToString("yyyyMMddHHmmss"));
+            string logName = String.Format(@"log\{0}_{1}.csv", jobID, System.DateTime.Now.ToString("yyyyMMddHHmmss"));
 
             var rootRepository = log4net.LogManager.GetRepository();
             foreach (var appender in rootRepository.GetAppenders())
