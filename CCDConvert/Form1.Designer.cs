@@ -42,6 +42,8 @@
             this.btnStart = new System.Windows.Forms.Button();
             this.gpRelativeSettings = new System.Windows.Forms.GroupBox();
             this.dgvRelativeSettings = new System.Windows.Forms.DataGridView();
+            this.Source = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Target = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.lbYOffset = new System.Windows.Forms.Label();
             this.txtY = new System.Windows.Forms.TextBox();
             this.lbXOffset = new System.Windows.Forms.Label();
@@ -51,8 +53,6 @@
             this.btnStop = new System.Windows.Forms.Button();
             this.txtLog = new System.Windows.Forms.TextBox();
             this.gpLog = new System.Windows.Forms.GroupBox();
-            this.Source = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Target = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.stInfo.SuspendLayout();
             this.gpRelativeSettings.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvRelativeSettings)).BeginInit();
@@ -190,6 +190,18 @@
             this.dgvRelativeSettings.Size = new System.Drawing.Size(345, 383);
             this.dgvRelativeSettings.TabIndex = 0;
             // 
+            // Source
+            // 
+            this.Source.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Source.HeaderText = "Source";
+            this.Source.Name = "Source";
+            // 
+            // Target
+            // 
+            this.Target.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Target.HeaderText = "Target";
+            this.Target.Name = "Target";
+            // 
             // lbYOffset
             // 
             this.lbYOffset.AutoSize = true;
@@ -274,18 +286,6 @@
             this.gpLog.TabIndex = 21;
             this.gpLog.TabStop = false;
             this.gpLog.Text = "Message";
-            // 
-            // Source
-            // 
-            this.Source.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.Source.HeaderText = "Source";
-            this.Source.Name = "Source";
-            // 
-            // Target
-            // 
-            this.Target.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.Target.HeaderText = "Target";
-            this.Target.Name = "Target";
             // 
             // FormMain
             // 

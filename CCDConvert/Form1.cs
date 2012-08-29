@@ -39,6 +39,9 @@ namespace CCDConvert
         // 存放狀態列所使用的圖片
         private Image imgRun = Properties.Resources.Run;
         private Image imgStop = Properties.Resources.Stop;
+        // Log 寫入註記(false: Normal, true: Error)
+        private bool isHardwareError = false;
+        private bool isSoftwareError = false;
 
         private double _offset_default_y, offset_y, offset_x;
         private Dictionary<string, string> dicRelative = new Dictionary<string, string>();
@@ -93,6 +96,7 @@ namespace CCDConvert
 
         private void btnStop_Click(object sender, EventArgs e)
         {
+            updateDictionaryRelative();
             // Connect to remote server
             if (!isConnect)
             {
@@ -103,15 +107,18 @@ namespace CCDConvert
                     isConnect = true;
                     tslbSoftware.Text = "Software Listening-Sending";
                     tslbSoftware.Image = imgRun;
+                    isSoftwareError = false;
+                    dgvRelativeSettings.ReadOnly = true;
                 }
                 catch (SocketException ex)
                 {
-                    if (jobID != "")
+                    if (jobID != "" && isSoftwareError != true)
                     {
-                        outputLog[0] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                        outputLog[0] = System.DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff");
                         outputLog[1] = "Software Error";
                         outputLog[4] = "N";
                         writeLog();
+                        isSoftwareError = true;
                     }
                     else
                     {
@@ -124,19 +131,31 @@ namespace CCDConvert
             {
                 try
                 {
-                    outputStream.Close();
-                    outputClient.Close();
+                    if (outputStream != null)
+                    {
+                        outputStream.Close();
+                    }
+                    if (outputClient != null)
+                    {
+                        outputClient.Close();
+                    }
                     btnStop.Text = "Send(&S)";
                     isConnect = false;
                     tslbSoftware.Text = "Software Listening";
-                    tslbSoftware.Image = imgStop;
+                    tslbSoftware.Image = imgRun;
+                    isSoftwareError = false;
+                    dgvRelativeSettings.ReadOnly = false;
                 }
                 catch (NetworkInformationException)
                 {
-                    outputLog[0] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                    outputLog[1] = "Software Error";
-                    outputLog[4] = "N";
-                    writeLog();
+                    if (isSoftwareError != true)
+                    {
+                        outputLog[0] = System.DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff");
+                        outputLog[1] = "Software Error";
+                        outputLog[4] = "N";
+                        writeLog();
+                        isSoftwareError = true;
+                    }
                     return;
                 }
             }
@@ -152,17 +171,19 @@ namespace CCDConvert
                 {
                     tslbHardware.Text = "Hardware OK";
                     tslbHardware.Image = imgRun;
+                    isHardwareError = false;
                 }
                 else
                 {
                     tslbHardware.Text = "Hardware Error";
                     tslbHardware.Image = imgStop;
-                    if (jobID != "")
+                    if (jobID != "" && isHardwareError != true)
                     {
-                        outputLog[0] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                        outputLog[0] = System.DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff");
                         outputLog[1] = "Hardware Error";
                         outputLog[4] = "N";
                         writeLog();
+                        isHardwareError = true;
                     }
                 }
             }
@@ -186,14 +207,14 @@ namespace CCDConvert
                         {
                             if (!String.IsNullOrEmpty(st) && !String.IsNullOrEmpty(dgv.Rows[i].Cells[1].Value.ToString()))
                             {
-                                tmpDict.Add(st, dgv.Rows[i].Cells[1].Value.ToString());
+                                tmpDict.Add(st.ToUpper(), dgv.Rows[i].Cells[1].Value.ToString().ToUpper());
                             }
                         }
                     }
                     else
                     {
                         if (!String.IsNullOrEmpty(dgv.Rows[i].Cells[0].Value.ToString()) && !String.IsNullOrEmpty(dgv.Rows[i].Cells[1].Value.ToString()))
-                            tmpDict.Add(dgv.Rows[i].Cells[0].Value.ToString(), dgv.Rows[i].Cells[1].Value.ToString());
+                            tmpDict.Add(dgv.Rows[i].Cells[0].Value.ToString().ToUpper(), dgv.Rows[i].Cells[1].Value.ToString().ToUpper());
                     }
 
                 }
@@ -272,8 +293,8 @@ namespace CCDConvert
                     double y = double.Parse(dicOutpout["FlawMD"]) * 1000 + _offset_default_y + offset_y;
                     double x = double.Parse(dicOutpout["FlawCD"]) * 1000 + offset_x;
 
-                    if (dicRelative.ContainsKey(dicOutpout["FlawName"]))
-                        result = result + String.Format("{0};{1};{2}", dicRelative[dicOutpout["FlawName"]], y.ToString(), x.ToString()) + "\r";
+                    if (dicRelative.ContainsKey(dicOutpout["FlawName"].ToUpper()))
+                        result = result + String.Format("{0};{1};{2}", dicRelative[dicOutpout["FlawName"].ToUpper()], y.ToString(), x.ToString()) + "\r";
                     else
                         // 2012/08/23: 若找不到符合的轉換資料，預設之輸出資料第一個欄位設為1
                         result = result + String.Format("{0};{1};{2}", "1", y.ToString(), x.ToString()) + "\r";
@@ -349,8 +370,8 @@ namespace CCDConvert
                     string target = dgv.Rows[i].Cells[1].Value.ToString();
                     navigator.SelectSingleNode("//relative_table").AppendChildElement(string.Empty, "column", string.Empty, null);
                     // Move to last column element and add source , target value.
-                    navigator.SelectSingleNode("//relative_table/column[last()]").AppendChildElement(string.Empty, "source", string.Empty, source.ToUpper());
-                    navigator.SelectSingleNode("//relative_table/column[last()]").AppendChildElement(string.Empty, "target", string.Empty, target.ToUpper());
+                    navigator.SelectSingleNode("//relative_table/column[last()]").AppendChildElement(string.Empty, "source", string.Empty, source);
+                    navigator.SelectSingleNode("//relative_table/column[last()]").AppendChildElement(string.Empty, "target", string.Empty, target);
 
                 }
             }
@@ -412,16 +433,21 @@ namespace CCDConvert
                 {
                     if ((exception.ErrorCode == 10060) || (exception.ErrorCode == 10035))
                     {
+                        isSoftwareError = false;
                         continue;
                     }
                     else // 判斷 Client 是否斷線
                     {
-                        tslbSoftware.Text = "Software Error";
-                        tslbSoftware.Image = imgStop;
-                        outputLog[0] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                        outputLog[1] = "Software Error";
-                        outputLog[4] = "N";
-                        writeLog();
+                        if (isSoftwareError != true)
+                        {
+                            tslbSoftware.Text = "Software Error";
+                            tslbSoftware.Image = imgStop;
+                            outputLog[0] = System.DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff");
+                            outputLog[1] = "Software Error";
+                            outputLog[4] = "N";
+                            writeLog();
+                            isSoftwareError = true;
+                        }
                     }
                     this.Listen();
                     return;
@@ -468,7 +494,7 @@ namespace CCDConvert
                         string str8 = (string)receiveData[0];
                         receiveData.RemoveAt(0);
                         str3 = String.Format("Receive: {0}\r\n", str8);
-                        outputLog[0] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                        outputLog[0] = System.DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff");
                         outputLog[1] = str8;
                         outputLog[4] = "N";
                         if (str8.CompareTo("GetStatus") == 0)
@@ -513,7 +539,7 @@ namespace CCDConvert
 
                         if (flag)
                         {
-                            continue;
+                            break;
                         }
 
                         string convertedData = convertData(str8, _offset_default_y);
@@ -522,11 +548,13 @@ namespace CCDConvert
                             setLogFile();
                             XmlConfigurator.Configure(new FileInfo("log4netconfig.xml"));
                             createNewLogFirst = false;
+                            log.Info("IN DATE TIME;FlawID;FlawName;Flaw Y value(M);Flaw X value(M);JobID;;TYPE;Flaw Y value(M);Flaw X value(M);OUT DATA TIME;STATUS");
                         }
                         else if (needCreateNewLog && createNewLogFirst == false)
                         {
                             createNewLogFile();
                             needCreateNewLog = false;
+                            log.Info("IN DATE TIME;FlawID;FlawName;Flaw Y value(M);Flaw X value(M);JobID;;TYPE;Flaw Y value(M);Flaw X value(M);OUT DATA TIME;STATUS");
                         }
                         if (isConnect && flag != true)
                         {
@@ -537,7 +565,7 @@ namespace CCDConvert
                         string[] splitConvertedData = convertedData.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
                         for (int i = 0; i < splitReceiveData.Length;i++)
                         {
-                            outputLog[1] = splitReceiveData[i];
+                            outputLog[1] = splitReceiveData[i].Replace(',', '\t');
                             outputLog[2] = splitConvertedData[i];
                             writeLog();
                         }
@@ -604,7 +632,7 @@ namespace CCDConvert
             try
             {
                 outputLog[2] = output;
-                outputLog[3] = System.DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                outputLog[3] = System.DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss.fff");
 
                 outputStream = outputClient.GetStream();
 
@@ -617,14 +645,19 @@ namespace CCDConvert
                 tslbSoftware.Text = "Software Listening-Sending";
                 tslbSoftware.Image = imgRun;
                 tmpUILog = String.Format("Output: {0}\r\n", output);
+                isSoftwareError = false;
                 updateLog method = new updateLog(this.updateLogText);
                 this.txtLog.Invoke(method);
             }
             catch (NetworkInformationException)
             {
-                tslbSoftware.Text = "Software Error";
-                tslbSoftware.Image = imgStop;
-                outputLog[2] = "Software Error";
+                if (isSoftwareError != true)
+                {
+                    tslbSoftware.Text = "Software Error";
+                    tslbSoftware.Image = imgStop;
+                    outputLog[2] = "Software Error";
+                    isSoftwareError = true;
+                }
             }
         }
 
