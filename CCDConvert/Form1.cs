@@ -43,7 +43,7 @@ namespace CCDConvert
         private bool isHardwareError = false;
         private bool isSoftwareError = false;
 
-        private double _offset_default_y, offset_y, offset_x;
+        private double _offset_default_y, offset_y, offset_x, rate;
         private Dictionary<string, string> dicRelative = new Dictionary<string, string>();
 
         // TCP Server
@@ -261,6 +261,7 @@ namespace CCDConvert
             Dictionary<string, string> dicOutpout = new Dictionary<string, string>();
             string result = "";
             string[] inputArray = input.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
+            outputLog[1] = "";
 
             foreach (string inputData in inputArray)
             {
@@ -290,14 +291,17 @@ namespace CCDConvert
                     }
                     jobID = dicOutpout["JobID"];
 
-                    double y = double.Parse(dicOutpout["FlawMD"]) * 1000 + _offset_default_y + offset_y;
+                    double y = (double.Parse(dicOutpout["FlawMD"]) * 1000 + _offset_default_y + offset_y) * rate;
                     double x = double.Parse(dicOutpout["FlawCD"]) * 1000 + offset_x;
 
                     if (dicRelative.ContainsKey(dicOutpout["FlawName"].ToUpper()))
-                        result = result + String.Format("{0};{1};{2}", dicRelative[dicOutpout["FlawName"].ToUpper()], y.ToString(), x.ToString()) + "\r";
+                        result = result + String.Format("{0};{1};{2}", dicRelative[dicOutpout["FlawName"].ToUpper()], y.ToString(), x.ToString()) + "\r\n";
                     else
                         // 2012/08/23: 若找不到符合的轉換資料，預設之輸出資料第一個欄位設為1
-                        result = result + String.Format("{0};{1};{2}", "1", y.ToString(), x.ToString()) + "\r";
+                        result = result + String.Format("{0};{1};{2}", "1", y.ToString(), x.ToString()) + "\r\n";
+
+                    // 組合輸出 Log 格式
+                    outputLog[1] = String.Format("{0}{1},{2},{3},{4},{5};", outputLog[1], dicOutpout["FlawID"], dicOutpout["FlawName"], dicOutpout["FlawMD"], dicOutpout["FlawCD"], dicOutpout["JobID"]);
                 }
                 else
                 {
@@ -314,6 +318,7 @@ namespace CCDConvert
             dicRelative = getRelativeGridViewToDictionary(dgvRelativeSettings);
             offset_y = double.TryParse(txtY.Text, out offset_y) ? offset_y : 0;
             offset_x = double.TryParse(txtX.Text, out offset_x) ? offset_x : 0;
+            rate = double.TryParse(txtRate.Text, out rate) ? rate : 1;
         }
 
         private bool getXml(string path, DataGridView dgv)
@@ -324,6 +329,7 @@ namespace CCDConvert
            
             txtY.Text = navigator.SelectSingleNode("//offset[@name='Y']").Value;
             txtX.Text = navigator.SelectSingleNode("//offset[@name='X']").Value;
+            txtRate.Text = navigator.SelectSingleNode("//rate").Value;
             _offset_default_y = navigator.SelectSingleNode("//offset[@name='DefaultOffsetY']").ValueAsDouble;
 
             XPathNodeIterator node = navigator.Select("//relative_table/column");
@@ -352,6 +358,7 @@ namespace CCDConvert
             XPathNavigator navigator = document.CreateNavigator();
             navigator.SelectSingleNode("//offset[@name='Y']").SetValue(txtY.Text);
             navigator.SelectSingleNode("//offset[@name='X']").SetValue(txtX.Text);
+            navigator.SelectSingleNode("//rate").SetValue(txtRate.Text);
 
             // Remove old relative_table for add new record
             if (navigator.Select("//relative_table/*").Count > 0)
@@ -548,25 +555,26 @@ namespace CCDConvert
                             setLogFile();
                             XmlConfigurator.Configure(new FileInfo("log4netconfig.xml"));
                             createNewLogFirst = false;
-                            log.Info("IN DATE TIME;FlawID;FlawName;Flaw Y value(M);Flaw X value(M);JobID;;TYPE;Flaw Y value(M);Flaw X value(M);OUT DATA TIME;STATUS");
+                            log.Info("IN DATE TIME,FlawID,FlawName,Flaw Y value(M),Flaw X value(M),JobID,OUT DATA,TYPE,Flaw Y value(mm),Flaw X value(mm),OUT DATA TIME,STATUS");
                         }
                         else if (needCreateNewLog && createNewLogFirst == false)
                         {
                             createNewLogFile();
                             needCreateNewLog = false;
-                            log.Info("IN DATE TIME;FlawID;FlawName;Flaw Y value(M);Flaw X value(M);JobID;;TYPE;Flaw Y value(M);Flaw X value(M);OUT DATA TIME;STATUS");
+                            log.Info("IN DATE TIME,FlawID,FlawName,Flaw Y value(M),Flaw X value(M),JobID,OUT DATA,TYPE,Flaw Y value(mm),Flaw X value(mm),OUT DATA TIME,STATUS");
                         }
                         if (isConnect && flag != true)
                         {
                             sendData(convertedData);
                         }
 
-                        string[] splitReceiveData = str8.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                        //string[] splitReceiveData = str8.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] splitReceiveData = outputLog[1].Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                         string[] splitConvertedData = convertedData.Split(new char[] { '\r' }, StringSplitOptions.RemoveEmptyEntries);
                         for (int i = 0; i < splitReceiveData.Length;i++)
                         {
-                            outputLog[1] = splitReceiveData[i].Replace(',', '\t');
-                            outputLog[2] = splitConvertedData[i];
+                            outputLog[1] = splitReceiveData[i];
+                            outputLog[2] = splitConvertedData[i].Replace(";", ",");
                             writeLog();
                         }
                     }
@@ -687,7 +695,7 @@ namespace CCDConvert
 
         private void writeLog()
         {
-            log.Info(String.Format(@"{0};{1};{2};{3};{4}", outputLog[0], outputLog[1], outputLog[2], outputLog[3], outputLog[4]));
+            log.Info(String.Format(@"{0},{1},,{2},{3},{4}", outputLog[0], outputLog[1], outputLog[2], outputLog[3], outputLog[4]));
         }
 
         #endregion
@@ -739,5 +747,6 @@ namespace CCDConvert
 
         }
         #endregion
+
     }
 }
