@@ -32,6 +32,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Convert.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="log4net, Version=1.2.11.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL" />
     <Reference Include="System" />
@@ -77,6 +80,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Convert.ico" />
     <Content Include="log4net\log4net.dll" />
     <None Include="Resources\Stop.png" />
     <None Include="Resources\Run.png" />

@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMain));
             this.lbSourceIP = new System.Windows.Forms.Label();
             this.txtSourceIP = new System.Windows.Forms.TextBox();
             this.lb1 = new System.Windows.Forms.Label();
@@ -333,6 +334,7 @@
             this.Controls.Add(this.lb1);
             this.Controls.Add(this.txtSourceIP);
             this.Controls.Add(this.lbSourceIP);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "FormMain";
             this.Text = "CCD Data Convert";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FormMain_FormClosing);
