@@ -31,7 +31,7 @@ namespace CCDConvert
         // 判斷是否需要建立新 Log 檔(換新工單時須建立新檔)
         private bool needCreateNewLog = false;
         // 存放工單名稱(建立 Log 檔時使用)
-        private string jobID = "";
+        private string jobID = "Initialize";
         // 存放待輸出的 Log 資料
         private string[] outputLog = new string[5];
         // 設定檔路徑
@@ -88,6 +88,8 @@ namespace CCDConvert
 
         private void btnStart_Click(object sender, EventArgs e)
         {
+            //string testData = "DATA,FlawID,0;FlawName,dss;FlawMD,1.009000;FlawCD,2.924000;JobID,HW TEST-26;";
+            //convertData(testData,1000);
             btnStart.Enabled = false;
             btnStop.Enabled = true;
             tslbSoftware.Text = "Software Listening";
@@ -282,6 +284,11 @@ namespace CCDConvert
                         }
                     }
 
+                    if (!dicOutpout.ContainsKey("JobID"))
+                    {
+                        dicOutpout.Add("JobID","");
+                    }
+
                     // Deal format string
                     //double offset_y = double.TryParse(txtY.Text, out offset_y) ? offset_y : 0;
                     //double offset_x = double.TryParse(txtX.Text, out offset_x) ? offset_x : 0;
@@ -301,7 +308,7 @@ namespace CCDConvert
                         result = result + String.Format("{0};{1};{2}", "1", y.ToString(), x.ToString()) + "\r\n";
 
                     // 組合輸出 Log 格式
-                    outputLog[1] = String.Format("{0}{1},{2},{3},{4},{5};", outputLog[1], dicOutpout["FlawID"], dicOutpout["FlawName"], dicOutpout["FlawMD"], dicOutpout["FlawCD"], dicOutpout["JobID"]);
+                    outputLog[1] = String.Format("{0}{1},{2},{3},{4},{5};", outputLog[1], dicOutpout["FlawID"], dicOutpout["FlawName"], dicOutpout["FlawMD"], dicOutpout["FlawCD"], jobID);
                 }
                 else
                 {
@@ -645,7 +652,12 @@ namespace CCDConvert
                 outputStream = outputClient.GetStream();
 
                 UnicodeEncoding encoder = new UnicodeEncoding();
-                byte[] buffer = encoder.GetBytes(String.Format("{0}",output));
+                byte[] tmp = encoder.GetBytes(String.Format("{0}", output));
+                byte[] buffer = new byte[tmp.Length / 2];
+                for (int i = 0, j = 0; i < tmp.Length; i += 2, j++)
+                {
+                    buffer[j] = tmp[i];
+                }
 
                 outputStream.Write(buffer, 0, buffer.Length);
                 outputStream.Flush();
