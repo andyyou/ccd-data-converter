@@ -250,6 +250,10 @@ namespace CcdDataConverter
             txtOffsetY.Text = _offsetY.ToString();
             txtOffsetX.Text = _offsetX.ToString();
             txtRate.Text = _rate.ToString();
+            txtSourceIP.Text = ch.GetSourceIP();
+            txtSourcePort.Text = ch.GetSourcePort();
+            txtDestIP.Text = ch.GetDestIP();
+            txtDestPort.Text = ch.GetDestPort();
         }
 
         // Save config to xml
@@ -266,6 +270,10 @@ namespace CcdDataConverter
                 ch.SaveOffsetY(_offsetY.ToString());
                 ch.SaveOffsetX(_offsetX.ToString());
                 ch.SaveRate(_rate.ToString());
+                ch.SaveSourceIP(txtSourceIP.Text);
+                ch.SaveSourcePort(txtSourcePort.Text);
+                ch.SaveDestIP(txtDestIP.Text);
+                ch.SaveDestPort(txtDestPort.Text);
 
                 return true;
             }

@@ -86,6 +86,58 @@ namespace CcdDataConverter.Helper
             }
         }
 
+        public string GetSourceIP()
+        {
+            using (FileStream stream = new FileStream(_configPath, FileMode.Open))
+            {
+                XPathDocument document = new XPathDocument(stream);
+                XPathNavigator navigator = document.CreateNavigator();
+
+                string value = navigator.SelectSingleNode("//network[@name='SourceIP']").Value;
+
+                return value;
+            }
+        }
+
+        public string GetSourcePort()
+        {
+            using (FileStream stream = new FileStream(_configPath, FileMode.Open))
+            {
+                XPathDocument document = new XPathDocument(stream);
+                XPathNavigator navigator = document.CreateNavigator();
+
+                string value = navigator.SelectSingleNode("//network[@name='SourcePort']").Value;
+
+                return value;
+            }
+        }
+
+        public string GetDestIP()
+        {
+            using (FileStream stream = new FileStream(_configPath, FileMode.Open))
+            {
+                XPathDocument document = new XPathDocument(stream);
+                XPathNavigator navigator = document.CreateNavigator();
+
+                string value = navigator.SelectSingleNode("//network[@name='DestIP']").Value;
+
+                return value;
+            }
+        }
+
+        public string GetDestPort()
+        {
+            using (FileStream stream = new FileStream(_configPath, FileMode.Open))
+            {
+                XPathDocument document = new XPathDocument(stream);
+                XPathNavigator navigator = document.CreateNavigator();
+
+                string value = navigator.SelectSingleNode("//network[@name='DestPort']").Value;
+
+                return value;
+            }
+        }        
+
         #endregion
 
         #region 儲存參數設定
@@ -144,6 +196,42 @@ namespace CcdDataConverter.Helper
             document.Load(_configPath);
             XPathNavigator navigator = document.CreateNavigator();
             navigator.SelectSingleNode("//rate").SetValue(value);
+            document.Save(_configPath);
+        }
+
+        public void SaveSourceIP(string value)
+        {
+            XmlDocument document = new XmlDocument();
+            document.Load(_configPath);
+            XPathNavigator navigator = document.CreateNavigator();
+            navigator.SelectSingleNode("//network[@name='SourceIP']").SetValue(value);
+            document.Save(_configPath);
+        }
+
+        public void SaveSourcePort(string value)
+        {
+            XmlDocument document = new XmlDocument();
+            document.Load(_configPath);
+            XPathNavigator navigator = document.CreateNavigator();
+            navigator.SelectSingleNode("//network[@name='SourcePort']").SetValue(value);
+            document.Save(_configPath);
+        }
+
+        public void SaveDestIP(string value)
+        {
+            XmlDocument document = new XmlDocument();
+            document.Load(_configPath);
+            XPathNavigator navigator = document.CreateNavigator();
+            navigator.SelectSingleNode("//network[@name='DestIP']").SetValue(value);
+            document.Save(_configPath);
+        }
+
+        public void SaveDestPort(string value)
+        {
+            XmlDocument document = new XmlDocument();
+            document.Load(_configPath);
+            XPathNavigator navigator = document.CreateNavigator();
+            navigator.SelectSingleNode("//network[@name='DestPort']").SetValue(value);
             document.Save(_configPath);
         }
 
