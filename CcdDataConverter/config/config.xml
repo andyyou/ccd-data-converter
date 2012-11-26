@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <config>
-  <relative_table>
+  <relative_setting>
     <column>
       <source>SW</source>
       <target>1</target>
@@ -9,8 +9,13 @@
       <source>WS,DS</source>
       <target>2</target>
     </column>
-  </relative_table>
-  <offset name="Y">0.821001</offset>
-  <offset name="X">0.121001</offset>
+    <column>
+      <source>dss</source>
+      <target>3</target>
+    </column>
+  </relative_setting>
+  <offset name="Y">0.1</offset>
+  <offset name="X">0.2</offset>
   <offset name="DefaultOffsetY">1000</offset>
+  <rate>1</rate>
 </config>

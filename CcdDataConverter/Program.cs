@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace CCDConvert
+namespace CcdDataConverter
 {
     static class Program
     {
@@ -15,7 +15,7 @@ namespace CCDConvert
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FormMain());
+            Application.Run(new Main());
         }
     }
 }

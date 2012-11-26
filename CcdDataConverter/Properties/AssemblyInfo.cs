@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // 組件的一般資訊是由下列的屬性集控制。
 // 變更這些屬性的值即可修改組件的相關
 // 資訊。
-[assembly: AssemblyTitle("CCD Data Convert")]
+[assembly: AssemblyTitle("CCD Data Converter")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Witriss Inspection Solutions")]
-[assembly: AssemblyProduct("CCD Data Convert")]
-[assembly: AssemblyCopyright("Copyright © 2012 Witriss Inspection Solutions")]
+[assembly: AssemblyCompany("Apputu Info. Co., Ltd.")]
+[assembly: AssemblyProduct("CCD Data Converter")]
+[assembly: AssemblyCopyright("Copyright © 2012 Apputu Info. Co., Ltd.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // 下列 GUID 為專案公開 (Expose) 至 COM 時所要使用的 typelib ID
-[assembly: Guid("6b795627-05ca-480e-92ee-fe2e409f2cea")]
+[assembly: Guid("24b698c1-44e2-4fc4-b1c2-e360b2609585")]
 
 // 組件的版本資訊是由下列四項值構成:
 //
