@@ -342,6 +342,7 @@ namespace CcdDataConverter
                         _isHardwareError = true;
                     }
                 }
+                Thread.Sleep(100);
             }
         }
 
