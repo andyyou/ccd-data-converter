@@ -200,13 +200,22 @@ namespace CcdDataConverter
         // Validate offset and rate field data
         private void OffsetValidating(object sender, CancelEventArgs e)
         {
-            //string pattern = @"[0-9]+(?:\.[0-9]*)?";
-            string pattern = @"^[\d]+(\.[\d]+)?$";
-            Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
+            //string pattern = @"^[\d]+(\.[\d]+)?$";
+            //Regex regex = new Regex(pattern, RegexOptions.IgnoreCase);
+            //TextBox txt = (TextBox)sender;
+            //if (!regex.IsMatch(txt.Text))
+            //{
+            //    txt.Text = "";
+            //}
             TextBox txt = (TextBox)sender;
-            if (!regex.IsMatch(txt.Text))
+            try
+            {
+                Convert.ToDouble(txt.Text);
+            }
+            catch
             {
                 txt.Text = "";
+                txt.Focus();
             }
         }
 
@@ -220,6 +229,7 @@ namespace CcdDataConverter
             if (!regex.IsMatch(txt.Text))
             {
                 txt.Text = "";
+                txt.Focus();
             }
         }
 
@@ -231,6 +241,7 @@ namespace CcdDataConverter
             if (port < 1 || port > 65535)
             {
                 txt.Text = "";
+                txt.Focus();
             }
         }
 
@@ -331,6 +342,7 @@ namespace CcdDataConverter
                         _isHardwareError = true;
                     }
                 }
+                Thread.Sleep(100);
             }
         }
 

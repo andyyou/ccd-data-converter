@@ -22,7 +22,9 @@ namespace CcdDataConverter.Helper
                 {
                     fileExists = true;
                 }
-                using (StreamWriter sw = new StreamWriter(filePath, true))
+                // 2013-01-07: 不指定編碼時遇到中文字會自動將檔案儲存為 UTF-8(Without Bom)
+                // 這樣會導致使用 Excel 開啟時中文字變成亂碼的問題，所以指定編碼為 Big5
+                using (StreamWriter sw = new StreamWriter(filePath, true, Encoding.GetEncoding("Big5")))
                 {
                     if (!fileExists)
                     {
